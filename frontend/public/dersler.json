@@ -1,0 +1,21 @@
+{
+  
+    "dersler": [
+      { "id": 1, "name": "Matematik" ,"icon":"math.svg" },
+      { "id": 2, "name": "Fizik","icon":"physics.svg" },
+      { "id": 3, "name": "Kimya" ,"icon":"chemical.svg" },
+      { "id": 4, "name": "Biyoloji" ,"icon":"biology.svg" },
+      { "id": 5, "name": "Edebiyat" ,"icon":"edebiyat.svg" },
+      { "id": 6, "name": "Tarih" ,"icon":"tarih.svg" },
+      { "id": 7, "name": "Coğrafya" ,"icon":"cografya.svg" },
+      { "id": 8, "name": "Felsefe"  ,"icon":"felsefe.svg"},
+      { "id": 9, "name": "Yabancı Dil" ,"icon":"dil.svg" },
+      { "id": 10, "name": "Bilgisayar Bilmi" ,"icon":"bilgisayar.svg" },
+      { "id": 11, "name": "Resim" ,"icon":"resim.svg" },
+      { "id": 12, "name": "Alperen" ,"icon":"resim.svg" },
+      { "id": 13, "name": "Alperen" ,"icon":"resim.svg" }
+      , { "id": 14, "name": "Alperen" ,"icon":"resim.svg" }
+      , { "id": 15, "name": "Alperen" ,"icon":"resim.svg" }
+      , { "id": 16, "name": "Alperen" ,"icon":"resim.svg" }
+    ]
+}
