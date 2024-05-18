@@ -1,8 +1,10 @@
 const User = require('../models/kullaniciModel.js');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const cloudinary = require('cloudinary').v2;
 const genareteTokenAndSetCokkie = require('../utils/generateToken.js');
 
-// login fonksiyonu
+// Login fonksiyonu
 const login = async (req, res) => {
     try {
         const { userName, password } = req.body;
@@ -26,7 +28,7 @@ const login = async (req, res) => {
     }
 };
 
-// logout fonksiyonu
+// Logout fonksiyonu
 const logout = (req, res) => {
     try {
         res.cookie("jwt", "", { maxAge: 0 });
@@ -37,44 +39,52 @@ const logout = (req, res) => {
     }
 };
 
-// signup fonksiyonu
+// Signup fonksiyonu
 const signup = async (req, res) => {
     try {
-        const { fullName, userName,email, password, confirmPassword, gender } = req.body;
+        const { fullName, userName, email, password, confirmPassword, gender } = req.body;
         if (password !== confirmPassword) {
             return res.status(400).json({ error: "Passwords don't match" });
         }
-        
+
         const user = await User.findOne({ userName });
         if (user) {
             return res.status(400).json({ error: "Username already exists" });
         }
-        
+
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        
-        const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${userName}`;
-        const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${userName}`;
-        
+
+        let profilePicUrl = '';
+        if (req.file) {
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'profile_pics'
+            });
+            profilePicUrl = result.secure_url;
+        } else {
+            profilePicUrl = gender === 'male' 
+                ? `https://avatar.iran.liara.run/public/boy?username=${userName}`
+                : `https://avatar.iran.liara.run/public/girl?username=${userName}`;
+        }
+
         const newUser = new User({
             fullName,
             userName,
             email,
             password: hashedPassword,
             gender,
-            profilePic: gender === "male" ? boyProfilePic : girlProfilePic
+            profilePic: profilePicUrl
         });
-        
+
         if (newUser) {
             genareteTokenAndSetCokkie(newUser._id, res);
             await newUser.save();
-            
+
             res.status(201).json({
                 _id: newUser._id,
                 fullName: newUser.fullName,
                 userName: newUser.userName,
                 email: newUser.email,
-
                 profilePic: newUser.profilePic
             });
         } else {
