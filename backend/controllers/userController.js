@@ -1,5 +1,6 @@
 const User = require('../models/kullaniciModel.js');
 const bcrypt = require('bcryptjs');
+const multer=require('multer');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('cloudinary').v2;
 const genareteTokenAndSetCokkie = require('../utils/generateToken.js');
