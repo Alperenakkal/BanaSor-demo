@@ -10,7 +10,7 @@ router.post("/logout",logout);
 router.get("/getUser/:userName",getUser)
 
 
-router.put("/updateUser/:userName",updateUser)
+router.put('/updateUser/:userName', upload.single('profilePic'), updateUser);
 
 
 
