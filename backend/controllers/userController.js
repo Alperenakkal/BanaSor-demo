@@ -111,4 +111,41 @@ const signup = async (req, res) => {
     }
 };
 
+<<<<<<< HEAD
 module.exports = { login, logout, signup,getUser };
+=======
+
+const updateUser = async function (req, res) {
+  
+    try {
+        let { fullName, userName, email, password, gender ,profilePic} = req.body;
+
+        let username = req.params.userName;
+        let filter = { userName: username }; // Filtreleme objesinde düzeltme yapıldı
+        
+        let user=await User.findOne(filter)
+        if(!user){return res.status(400).json({error:"user not found"})}
+        if(password){
+            let salt=await bcrypt.genSalt(10);
+            let hashedPassword=await bcrypt.hash(password, salt)
+            user.password=hashedPassword
+        }
+       user.fullName= fullName || user.fullName
+       user.userName= userName || user.userName
+       user.email= email || user.email
+       user.gender= gender || user.gender
+       user.profilePic= profilePic || user.profilePic
+       
+       user=await user.save();
+
+        return res.status(200).json(user); // Görüntülenecek kullanıcı bilgileri JSON formatında döndürülüyor
+
+    } catch (error) {
+        res.status(400).json({ error: "Güncelleme başarısız" });
+        console.log(error.message)
+    }
+};
+
+
+module.exports = { login, logout, signup ,updateUser};
+>>>>>>> 0f692c5c (updateUser)

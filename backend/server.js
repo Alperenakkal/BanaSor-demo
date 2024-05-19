@@ -9,7 +9,9 @@ const cookieParser = require('cookie-parser');
 
 // .env dosyasını yükle
 dotenv.config();
+const bodyParser = require('body-parser');
 
+app.use(bodyParser.urlencoded({ extended: true }));
 // Cloudinary yapılandırması
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
