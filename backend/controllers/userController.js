@@ -38,11 +38,24 @@ const logout = (req, res) => {
         res.status(500).json({ error: "Internal Server error" });
     }
 };
+const getUser = async (req,res) =>{
+    try {
+        const username = req.params.userName; // veya req.body.username
+        const filter = { userName: username };
+
+        const user = await User.findOne(filter);
+        res.status(200).json(user);
+
+    } catch (error) {
+        console.log("Error in getUser controller",error.message);
+        res.status(500).json({error:"Böyle bir kullanici bulunamdi"})
+    }
+}
 
 // Signup fonksiyonu
 const signup = async (req, res) => {
     try {
-        const { fullName, userName, email, password, confirmPassword, gender } = req.body;
+        const { fullName, userName, email, password, confirmPassword, gender ,seviye} = req.body;
         if (password !== confirmPassword) {
             return res.status(400).json({ error: "Passwords don't match" });
         }
@@ -73,7 +86,8 @@ const signup = async (req, res) => {
             email,
             password: hashedPassword,
             gender,
-            profilePic: profilePicUrl
+            profilePic: profilePicUrl,
+            seviye
         });
 
         if (newUser) {
@@ -85,7 +99,8 @@ const signup = async (req, res) => {
                 fullName: newUser.fullName,
                 userName: newUser.userName,
                 email: newUser.email,
-                profilePic: newUser.profilePic
+                profilePic: newUser.profilePic,
+                seviye:newUser.seviye
             });
         } else {
             res.status(400).json({ error: "Invalid user data" });
@@ -96,4 +111,4 @@ const signup = async (req, res) => {
     }
 };
 
-module.exports = { login, logout, signup };
+module.exports = { login, logout, signup,getUser };

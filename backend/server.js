@@ -31,19 +31,7 @@ const soruRoute = require('./routes/soru');
 app.use('/kullanici', kullaniciRoute);
 app.use('/soru', soruRoute);
 
-// Resim yükleme rotası
-app.post('/upload', upload.single('image'), async (req, res) => {
-    try {
-        const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: 'folder_name'
-        });
 
-        res.json({ imageUrl: result.secure_url });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error uploading image to Cloudinary' });
-    }
-});
 
 // Sunucuyu başlat
 const port = process.env.PORT || 3000;
