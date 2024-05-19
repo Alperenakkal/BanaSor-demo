@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { TimeCal } from './TimeCal';
 
 
-const Emine = () => {
+const kisiler = () => {
     
         const kisiler = [
             { name: "Alperen Akal", puan: 85, src: "https://randomuser.me/api/portraits/men/1.jpg" },
@@ -77,4 +77,4 @@ const Emine = () => {
     );
 }
 
-export default Emine;
+export default kisiler;
