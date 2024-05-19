@@ -1,10 +1,12 @@
 const User = require('../models/kullaniciModel.js');
+const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const multer=require('multer');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('cloudinary').v2;
 const genareteTokenAndSetCokkie = require('../utils/generateToken.js');
-
+const storage = multer.memoryStorage(); // Dosyaları bellek üzerinde tutmak için
+const upload = multer({ storage: storage });
 // Login fonksiyonu
 const login = async (req, res) => {
     try {
@@ -115,35 +117,45 @@ const signup = async (req, res) => {
 
 
 const updateUser = async function (req, res) {
-  
     try {
-        let { fullName, userName, email, password, gender ,profilePic} = req.body;
+        // form-data'dan verileri alın
+        let { fullName, userName, email, password, gender } = req.body;
 
         let username = req.params.userName;
         let filter = { userName: username }; // Filtreleme objesinde düzeltme yapıldı
-        
-        let user=await User.findOne(filter)
-        if(!user){return res.status(400).json({error:"user not found"})}
-        if(password){
-            let salt=await bcrypt.genSalt(10);
-            let hashedPassword=await bcrypt.hash(password, salt)
-            user.password=hashedPassword
+
+        let user = await User.findOne(filter);
+        if (!user) {
+            return res.status(400).json({ error: "user not found" });
         }
-       user.fullName= fullName || user.fullName
-       user.userName= userName || user.userName
-       user.email= email || user.email
-       user.gender= gender || user.gender
-       user.profilePic= profilePic || user.profilePic
-       
-       user=await user.save();
+
+        // Şifreyi hash'leyin
+        if (password) {
+            let salt = await bcrypt.genSalt(10);
+            let hashedPassword = await bcrypt.hash(password, salt);
+            user.password = hashedPassword;
+        }
+
+        // Kullanıcı bilgilerini güncelleyin
+        user.fullName = fullName || user.fullName;
+        user.userName = userName || user.userName;
+        user.email = email || user.email;
+        user.gender = gender || user.gender;
+
+        // Dosya yüklemesi varsa profil resmini güncelleyin
+        if (req.file) {
+            user.profilePic = req.file.buffer; // Dosya verisini bellekten alın
+        }
+
+        user = await user.save();
 
         return res.status(200).json(user); // Görüntülenecek kullanıcı bilgileri JSON formatında döndürülüyor
-
     } catch (error) {
         res.status(400).json({ error: "Güncelleme başarısız" });
-        console.log(error.message)
+        console.log(error.message);
     }
 };
+
 
 
 module.exports = { login, logout, signup ,updateUser,getUser};

@@ -9,7 +9,12 @@ router.post("/logout",logout);
 
 router.get("/getUser/:userName",getUser)
 
+<<<<<<< HEAD
 router.put("/updateUser/:userName",upload.single('profilePic') ,updateUser);
+=======
+
+router.put('/updateUser/:userName', upload.single('profilePic'), updateUser);
+>>>>>>> refs/remotes/origin/main
 
 
 
