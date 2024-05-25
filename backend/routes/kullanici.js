@@ -12,11 +12,11 @@ router.get("/getUser/username/:userName", getUser); // Kullanıcı adına göre 
 router.get("/getUser/id/:id", getUserId); // ID'ye göre kullanıcı al
 
 
-<<<<<<< HEAD
-router.put("/updateUser/:userName",upload.single('profilePic') ,updateUser);
-=======
 
-router.put('/updateUser/:userName', upload.single('profilePic'), updateUser);
+router.put("/updateUser/:userName",upload.single('profilePic') ,updateUser);
+
+router.post("/follow/:userName",protectRoute,followUnFollowUser);
+
 
 
 

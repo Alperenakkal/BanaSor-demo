@@ -3,7 +3,7 @@ const mongoose = require('mongoose'); // Mongoose kütüphanesini ekleyin
 
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
-const multer=require('multer');
+
 const jwt = require('jsonwebtoken');
 const cloudinary = require('cloudinary').v2;
 const genareteTokenAndSetCokkie = require('../utils/generateToken.js');
