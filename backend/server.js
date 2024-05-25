@@ -40,4 +40,5 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
     connectToMongoDB();
     console.log(`Server Running on Port ${port}`);
+    console.log(`Open http://localhost:${port} in your browser`);
 });

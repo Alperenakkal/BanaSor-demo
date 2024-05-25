@@ -1,16 +1,20 @@
 const express = require('express');
 
-const { login, logout, signup, updateUser ,getUser} = require('../controllers/userController');
+const { login, logout, signup, updateUser ,getUser,getUserId, followUnFollowUser } = require('../controllers/userController');
 const upload = require('../utils/mulerConfig'); // Multer yapılandırmasını içe aktar
+const  protectRoute  = require('../middleware/protectRoute');
 const router = express.Router();
 router.post("/login",login);
-router.post('/signup', upload.single('profilePic'), signup); // Multer'ı kullanarak profilePic dosyasını al
+router.post('/signup', upload.fields([{ name: 'profilePic', maxCount: 1 }]), signup); // Multer'ı kullanarak profilePic dosyasını al
 router.post("/logout",logout);
 
-router.get("/getUser/:userName",getUser)
+router.get("/getUser/username/:userName", getUser); // Kullanıcı adına göre kullanıcı al
+router.get("/getUser/id/:id", getUserId); // ID'ye göre kullanıcı al
+
 
 
 router.put('/updateUser/:userName', upload.single('profilePic'), updateUser);
+router.post("/follow/:userName",protectRoute,followUnFollowUser);
 
 
 
