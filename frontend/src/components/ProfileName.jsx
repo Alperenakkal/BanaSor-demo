@@ -11,6 +11,14 @@ const ProfileName = ({ name }) => {
   const [followerCount, setFollowerCount] = useState(0);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [kullanici, setKullanici] = useState(false);
+  const [userid ,setUserId]= useState(0);
+  const [kullaniciid,setKullaniciId]=useState(0);
+  const [userTokenData, setUserTokenData] = useState(null);
+  const [kullaniciidReady, setKullaniciIdReady] = useState(false);
+  const [useridReady, setUserIdReady] = useState(false);
+
+
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -22,20 +30,63 @@ const ProfileName = ({ name }) => {
     setFollowerCount(isFollowing ? followerCount - 1 : followerCount + 1);
   };
 
+
+
+  
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        const token = localStorage.getItem('jwt');
         const response = await axios.get(`http://localhost:3000/kullanici/getUser/username/${name}`);
         setUserData(response.data);
+        if (response.data && response.data._id) {
+          setUserId(response.data._id);
+          setUserIdReady(true);
+          setLoading(false);
+        }
       } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
+        console.error('Kullanıcı verilerini alma hatası:', error);
         setLoading(false);
       }
     };
-
+  
     fetchUserData();
   }, [name]);
+  
+  useEffect(() => {
+    const fetchTokenUserData = async () => {
+      try {
+        const token = localStorage.getItem('jwt');
+        const response = await axios.get(`http://localhost:3000/kullanici/getUser/kayitli`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setUserTokenData(response.data);
+        if (response.data && response.data._id) {
+          setKullaniciId(response.data._id);
+          setKullaniciIdReady(true);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Kullanıcı verilerini alma hatası:', error);
+        setLoading(false);
+      }
+    };
+  
+    fetchTokenUserData();
+  }, [name]);
+  
+  useEffect(() => {
+    if (kullaniciidReady && useridReady) {
+      if (kullaniciid === userid) {
+        setKullanici(true);
+      } else {
+        setKullanici(false);
+      }
+    }
+  }, [kullaniciidReady, useridReady]);
+
 
   if (loading) {
     return <Spinner />;
@@ -49,12 +100,13 @@ const ProfileName = ({ name }) => {
   const isim = nameParts[0];
   const soyisim = nameParts[1];
   const fullName = `${isim} ${soyisim}`;
-  const isAlperenAkal = isim === "Alperen" && soyisim === "Akal";
+ 
+
 
   const formatDate = (isoDate) => {
     return format(new Date(isoDate), 'd MMMM yyyy', { locale: tr });
   };
-  console.log(userData)
+  
   return (
     <Flex
       direction="column"
@@ -89,7 +141,7 @@ const ProfileName = ({ name }) => {
           >
             Çirak
           </Flex>
-          {!isAlperenAkal && (
+          {!kullanici && (
             <Button
               size="lg"
               bg="#EEE"
@@ -103,7 +155,7 @@ const ProfileName = ({ name }) => {
           )}
         </Flex>
       </Flex>
-      {isAlperenAkal && (
+      {kullanici && (
         <Flex alignItems="flex-start" mt="30px">
           <Button width="300px" borderRadius="30px" fontWeight="bold" gap={2} onClick={handleClick}>
             <FaPencilAlt />

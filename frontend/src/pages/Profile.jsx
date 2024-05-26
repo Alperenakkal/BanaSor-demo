@@ -10,22 +10,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { name } = useParams();
   const [userData, setUserData] = useState(null);
-  const getCookie = (name) => {
-    const cookieString = document.cookie;
-    const cookies = cookieString.split('; ');
 
-    for (let cookie of cookies) {
-        const [cookieName, cookieValue] = cookie.split('=');
-        if (cookieName === name) {
-            return decodeURIComponent(cookieValue); // Cookie değerini decode edelim
-        }
-    }
-
-    return "cookie yok";
-};
-
-const jwtToken = getCookie("jwt");
-console.log("Stored token:", jwtToken);
 
 
   
@@ -35,13 +20,10 @@ console.log("Stored token:", jwtToken);
 
   
   return (
-    <Flex p={"30px"} gap={50} >
-           <ProfileName name={name}/>
-           <ProfilePast name={name}/>
-
-         
-
-    </Flex>
+    <Flex p={"30px"} gap={50} alignItems="flex-start" justifyContent="flex-start">
+    <ProfileName name={name}/>
+    <ProfilePast name={name}/>
+  </Flex>
   
   
   )
