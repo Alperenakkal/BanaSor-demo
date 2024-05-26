@@ -1,6 +1,9 @@
 const Soru = require('../models/soruModel');
 const User = require('../models/kullaniciModel');
-
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const storage = multer.memoryStorage(); // Dosyaları bellek üzerinde tutmak için
+const upload = multer({ storage: storage });
 
 const getSoruByDers = async (req,res) =>{
     try {
@@ -38,8 +41,93 @@ const getUserSoru = async (req, res) => {
     }
   }
   
+
+  const soruSor=async(req,res)=>{
+    try {        
+      const id = req.user._id;
+      const {  dersName, soru, cevaplar } = req.body;
+
+      let soruPicUrl = '';
+      if (req.file) {
+          const result = await cloudinary.uploader.upload(req.file.path, {
+              folder: 'profile_pics'
+          });
+          soruPicUrl = result.secure_url;
+      } 
+      
+
+      const newSoru = new Soru({
+          userId:id,
+          dersName,
+          soru,
+          cevaplar,
+          soruPic: soruPicUrl,
+      });
+
+      const savedSoru = await newSoru.save();
+      res.status(201).json(savedSoru);
+
+    } catch (error) {
+      res.status(500).json({ message:"bağlanamadı" });
+      console.log(error.message)
+    }
+
+
+
+  }
+
+
+  const getSorular = async (req, res) => {
+    try {
+        const sorular = await Soru.find(); // Tüm soruları getir
+
+        if (!sorular || sorular.length === 0) {
+            return res.status(404).json({ error: "Soru bulunamadı" });
+        }
+
+        res.status(200).json(sorular);
+    } catch (error) {
+        console.error( error.message);
+        res.status(500).json({ error: "bağlanamadı " });
+    }
+};
+
+const updateSoru = async (req, res) => {
+  try {
+    const soruId = req.params.soruId;
+      let { dersName, soru, cevaplar } = req.body;
+
+      // Mevcut soruyu veritabanından bul
+      const existingSoru = await Soru.findById(soruId);
+      if (!existingSoru) {  
+          return res.status(404).json({ error: "Soru bulunamadı" });
+      }
+
+      
+      let soruPicUrl = existingSoru.soruPic;
+      if (req.file) {
+          const result = await cloudinary.uploader.upload(req.file.path, {
+              folder: 'soru_pics'
+          });
+          soruPicUrl = result.secure_url;
+      }
+
+      
+      existingSoru.dersName = dersName || existingSoru.dersName;
+      existingSoru.soru = soru || existingSoru.soru;
+      existingSoru.cevaplar = cevaplar || existingSoru.cevaplar;
+      existingSoru.soruPic = soruPicUrl;
+
+      
+      const updatedSoru = await existingSoru.save();
+      res.status(200).json(updatedSoru);
+  } catch (error) {
+      console.error(error.message);
+      res.status(500).json({ error: "bağlanamadı" });
+  }
+};
+
   
 
 
-
-module.exports = { getSoruByDers,getUserSoru,};
+module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru};

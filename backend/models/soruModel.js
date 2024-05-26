@@ -5,7 +5,7 @@ const soruSchema = new Schema({
     userId:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required:true
+        
 
     },
     dersName:{
@@ -17,13 +17,16 @@ const soruSchema = new Schema({
         required:true,
         unique:true
     },
+    soruPic:{
+        type:String 
+        
+    },
     cevaplar: [{
-        user: {
+     
             type:mongoose.Schema.Types.ObjectId,
-            ref:"User",
-            required:true
-        },
-        cevaplar:String
+            ref:"Cevap",
+            
+        
         
       }]
 
