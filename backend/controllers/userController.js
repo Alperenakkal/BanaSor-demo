@@ -5,8 +5,9 @@ const multer = require('multer');
 const bcrypt = require('bcryptjs');
 
 const jwt = require('jsonwebtoken');
+const generateTokenAndSetCookie = require('../utils/generateTokenAndSetCookie.js');
 const cloudinary = require('cloudinary').v2;
-const genareteTokenAndSetCokkie = require('../utils/generateToken.js');
+
 const storage = multer.memoryStorage(); // Dosyaları bellek üzerinde tutmak için
 const upload = multer({ storage: storage });
 // Login fonksiyonu
@@ -34,19 +35,21 @@ const login = async (req, res) => {
             return res.status(400).json({ error: "Invalid username or password" });
         }
 
-        generateTokenAndSetCookie(user._id, res);
+        const token = generateTokenAndSetCookie(user._id, res);
 
         res.status(200).json({
             _id: user._id,
             fullName: user.fullName,
             userName: user.userName,
-            profilePic: user.profilePic
+            profilePic: user.profilePic,
+            token // Token'ı yanıtla birlikte gönderiyoruz
         });
     } catch (error) {
         console.log("Error in login controller", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
 
 // Logout fonksiyonu
 const logout = (req, res) => {
@@ -71,7 +74,26 @@ const getUser = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 };
+const getUserJwt = async(req,res)=>{
+try {
+        const id = req.user._id;
+        console.log("Received ID:", id); // ID'yi loglayın
 
+      
+
+        const user = await User.findById(id);
+        console.log("User found:", user); // Bulunan kullanıcıyı loglayın
+
+        if (!user) {
+            return res.status(404).json({ error: "Giris Yapılmamis" });
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        console.log("Error in getUserId controller:", error.message);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
 // Kullanıcı ID'si ile kullanıcıyı getiren fonksiyon
 const getUserId = async (req, res) => {
     try {
@@ -136,7 +158,7 @@ const signup = async (req, res) => {
         });
 
         if (newUser) {
-            genareteTokenAndSetCokkie(newUser._id, res);
+            generateTokenAndSetCookie(newUser._id, res);
             await newUser.save();
 
             res.status(201).json({
@@ -249,5 +271,5 @@ module.exports = followUnFollowUser;
 
 
 
-module.exports = { login, logout, signup ,updateUser,getUser,getUserId,followUnFollowUser};
+module.exports = { login, logout, signup ,updateUser,getUser,getUserId,followUnFollowUser,getUserJwt};
 

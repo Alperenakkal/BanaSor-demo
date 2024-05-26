@@ -7,7 +7,7 @@ const router = express.Router();
 
 // Define a route
 router.get('/ders/:dersName',getSoruByDers)
-router.get('/user',protectRoute,getUserSoru)
+router.get('/user/:userName',getUserSoru)
 
 
 

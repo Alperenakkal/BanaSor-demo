@@ -14,19 +14,31 @@ const getSoruByDers = async (req,res) =>{
     console.log("Error in getSoruByDers controller:", error.message);
     res.status(500).json({ error: "Internal server error" });
 }}
-const getUserSoru = async (req,res) =>{
+const getUserSoru = async (req, res) => {
     try {
-    const user = await User.findById(req.user._id);
-    console.log('Current user:', req.user.userName);
-    const sorular = await Soru.find({userId:user})
-    if (!sorular) {
-        return res.status(400).json({ error: "soru bulunamadi" });
+      const username = req.params.userName;
+      const user = await User.findOne({ userName: username });
+      
+      if (!user) {
+        return res.status(401).json({ error: "Boyle bir kisi yok" });
+      }
+
+      console.log(user._id);
+      const sorular = await Soru.find({ userId: user._id });
+  
+      if (!sorular) {
+        return res.status(400).json({ error: "Soru bulunamadi" });
+      }
+  
+      res.status(200).json(sorular);
+  
+    } catch (error) {
+      console.log("Error in getUserSoru controller:", error.message);
+      res.status(500).json({ error: "Internal server error" });
     }
-    res.status(200).json(sorular);
-} catch (error) {
-    console.log("Error in getUserSoru controller:", error.message);
-    res.status(500).json({ error: "Internal server error" });
-}}
+  }
+  
+  
 
 
 
