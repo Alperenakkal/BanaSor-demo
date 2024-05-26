@@ -6,6 +6,8 @@ const app = express();
 const connectToMongoDB = require('./db/connectToMongoDb');
 const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
+
 
 // .env dosyasını yükle
 dotenv.config();
@@ -22,6 +24,12 @@ cloudinary.config({
 // Orta katmanlar
 app.use(express.json());
 app.use(cookieParser());
+const corsOptions = {
+    origin: 'http://localhost:5173', // React uygulamanızın URL'si
+    credentials: true,
+};
+
+app.use(cors(corsOptions));
 
 // Rotalar
 app.get('/', (req, res) => {
@@ -40,4 +48,5 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
     connectToMongoDB();
     console.log(`Server Running on Port ${port}`);
+    console.log(`Open http://localhost:${port} in your browser`);
 });

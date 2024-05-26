@@ -30,6 +30,15 @@ const userSchema =new mongoose.Schema({
     seviye:{
         type:String,
         default:"Seviye Belirtilmemiş"
+    },
+    followers:{
+        type: [String],
+        default : [],
+
+    },
+    following: {
+        type:[String],
+        default: [],
     }
 },{timestamps:true});
 const User =mongoose.model("User",userSchema);

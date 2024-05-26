@@ -25,7 +25,7 @@ const Navbar = () => {
       }
   }, [isOpen]);
   const handleClick = () =>{
-    navigate(`/profile/${"Alperen Akal"}`)
+    navigate(`/profile/${"akalın"}`)
   }
   return (
     <Flex display={"flex"} justifyContent={"flex-end"} padding={"10px"}  position={"relative"}>
