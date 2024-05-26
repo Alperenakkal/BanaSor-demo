@@ -13,10 +13,12 @@ router.get("/getUser/id/:id", getUserId); // ID'ye göre kullanıcı al
 
 
 
+
 router.put("/updateUser/:userName",upload.single('profilePic') ,updateUser);
 
 router.post("/follow/:userName",protectRoute,followUnFollowUser);
 router.get("/getUser/kayitli",protectRoute,getUserJwt);
+
 
 
 
