@@ -1,84 +1,68 @@
 {
-    "sorular": [
+  "sorular": [
+    {
+      "isim": "Matematik",
+      "sinif": "lise",
+
+      "sorular": [
         {
-          "isim": "Matematik",
-          "sorular": [
-            {
-              "globalId": 0,
-              "dersId": "mat101",
-              "soru": "Bir tren istasyona saat 14:00'de varıyor ve 45 dakika sonra hareket ediyor. Trenin hareket saatini bulun.",
-              "soruSorulmaSuresi": "2024-03-03T13:00:00Z",
-              "avatar":"https://avatar.iran.liara.run/public/41",
-              "isim" : "Alperen",
-              "soyisim": "Akal",
-              "puan":"70",
-              "cevap":"cevap 500"
-            },
-            {
-              "globalId": 0,
-              "dersId": "mat101",
-              "soru": "Bir tren istasyona saat 14:00'de varıyor ve 45 dakika sonra hareket ediyor. Trenin hareket saatini bulun.",
-              "soruSorulmaSuresi": "2024-03-03T13:00:00Z",
-              "avatar":"https://avatar.iran.liara.run/public/41",
-              "isim" : "Alperen",
-              "soyisim": "Akal",
-              "puan":"70",
-              "admin": "true"
-            }
-           
-          ]
-        },
-        {
-          "isim": "Fizik",
-          "sorular": [
-            {
-              "globalId": 1,
-              "dersId": "fiz101",
-              "soru": "5 Newton'luk bir kuvvetle hareket eden 10 kg'lık bir cismin ivmesi nedir?",
-              "soruSorulmaSuresi": "2024-03-29T10:00:00Z",
-              "avatar":"https://avatar.iran.liara.run/public/28",
-              "isim" : "EMine",
-              "soyisim": "Aydınlı",
-              "puan":"90"
-            },
-            {
-              "globalId": 3,
-              "dersId": "fiz102",
-              "soru": "Mutlak sıfır derece kaç Kelvin'dir?",
-              "soruSorulmaSuresi": "2024-03-29T11:00:00Z",
-              "avatar":"https://avatar.iran.liara.run/public/31",
-              "isim" : "Huseyin",
-              "soyisim": "Bakalci",
-              "puan":"30"
-            }
-          ]
-        },
-        {
-            "isim":"Matematik",
-            "sorular":[
-                {
-                    "globalId": 2,
-                    "dersId": "mat102",
-                    "soru": "Gülhan gülçin'den 3 yaş büyük annesinden 22 yaş küçüktür üçünün yaşları toplamı 61 olduğuna göre Gülhan kaç yaşındadır?",
-                    "soruSorulmaSuresi": "2024-03-28T15:00:00Z",
-                    "avatar":"https://avatar.iran.liara.run/public/40",
-                    "isim" : "Beyza",
-                    "soyisim": "Şahin",
-                    "puan":"50",
-                    "cevap":"cevap 500"
-                  },
-                  {
-                    "globalId": 2,
-                    "dersId": "mat102",
-                    "soru": "Gülhan gülçin'den 3 yaş büyük annesinden 22 yaş küçüktür üçünün yaşları toplamı 61 olduğuna göre Gülhan kaç yaşındadır?",
-                    "soruSorulmaSuresi": "2024-03-28T15:00:00Z",
-                    "avatar":"https://avatar.iran.liara.run/public/40",
-                    "isim" : "Beyza",
-                    "soyisim": "Şahin",
-                    "puan":"50",
-                    "cevap":"cevap 500"
-                  }
-            ]
+          "globalId": 0,
+          "dersId": "mat101",
+          "soru": "Bir tren istasyona saat 14:00'de varıyor ve 45 dakika sonra hareket ediyor. Trenin hareket saatini bulun.",
+          "soruSorulmaSuresi": "2024-03-03T13:00:00Z",
+          "avatar": "https://avatar.iran.liara.run/public/41",
+          "isim": "Alperen",
+          "soyisim": "Akal",
+          "puan": "70",
+          "sinifId": 1000
         }
-      ] 
+      ]
+    },
+    {
+      "isim": "Fizik",
+      "sinif": "lise",
+
+      "sorular": [
+        {
+          "globalId": 1,
+          "dersId": "fiz101",
+          "soru": "5 Newton'luk bir kuvvetle hareket eden 10 kg'lık bir cismin ivmesi nedir?",
+          "soruSorulmaSuresi": "2024-03-29T10:00:00Z",
+          "avatar": "https://avatar.iran.liara.run/public/28",
+          "isim": "EMine",
+          "soyisim": "Aydınlı",
+          "puan": "90",
+          "sinifId": 1002
+        },
+        {
+          "globalId": 3,
+          "dersId": "fiz102",
+          "soru": "Mutlak sıfır derece kaç Kelvin'dir?",
+          "soruSorulmaSuresi": "2024-03-29T11:00:00Z",
+          "avatar": "https://avatar.iran.liara.run/public/31",
+          "isim": "Huseyin",
+          "soyisim": "Bakalci",
+          "puan": "30",
+          "sinifId": 1002
+        }
+      ]
+    },
+    {
+      "isim": "Matematik",
+      "sinif": "lise",
+      "sorular": [
+        {
+          "globalId": 2,
+          "dersId": "mat102",
+          "sinifId": 1001,
+          "soru": "Gülhan gülçin'den 3 yaş büyük annesinden 22 yaş küçüktür üçünün yaşları toplamı 61 olduğuna göre Gülhan kaç yaşındadır?",
+          "soruSorulmaSuresi": "2024-03-28T15:00:00Z",
+          "avatar": "https://avatar.iran.liara.run/public/40",
+          "isim": "Beyza",
+          "soyisim": "Şahin",
+          "puan": "50"
+        }
+      ]
+    }
+  ]
 }

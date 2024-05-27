@@ -14,7 +14,7 @@ import {
   import { useState } from "react";
   import { useNavigate } from "react-router-dom";
   
-  const ProfileEdit = () => {
+  const SingUp = () => {
     const navigate = useNavigate();
     const toast = useToast();
     const [user, setUser] = useState({
@@ -62,7 +62,7 @@ import {
       <Flex direction="column">
         <Box maxW="md" w="1000px" mx="auto" p={5} bg="gray.100">
           <Heading as="h1" size="xl" textAlign="center" mb={6}>
-            PROFİLİ GÜNCELLE
+            Kayıt Ol
           </Heading>
   
           <Stack spacing={4} as="form" onSubmit={handleSubmit}>
@@ -106,6 +106,16 @@ import {
               />
             </FormControl>
   
+            <FormControl id="password">
+              <FormLabel>Şifre</FormLabel>
+              <Input
+                name="password"
+                type="password"
+                value={user.password}
+                onChange={handleChange}
+              />
+            </FormControl>
+  
             <FormControl id="seviye">
               <FormLabel>Seviye</FormLabel>
               <Select
@@ -133,7 +143,7 @@ import {
             </FormControl>
   
             <Button type="submit" colorScheme="blue" size="lg">
-              Profili Güncelle
+              Kayıt Ol
             </Button>
           </Stack>
         </Box>
@@ -141,4 +151,4 @@ import {
     );
   };
   
-  export default ProfileEdit;
+  export default SingUp;

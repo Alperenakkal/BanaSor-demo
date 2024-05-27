@@ -8,7 +8,7 @@ import { tr } from 'date-fns/locale';
 
 const ProfileName = ({ name }) => {
   const [isFollowing, setIsFollowing] = useState(false);
-  const [followerCount, setFollowerCount] = useState(0);
+  const [follower, setFollower] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [kullanici, setKullanici] = useState(false);
@@ -17,18 +17,16 @@ const ProfileName = ({ name }) => {
   const [userTokenData, setUserTokenData] = useState(null);
   const [kullaniciidReady, setKullaniciIdReady] = useState(false);
   const [useridReady, setUserIdReady] = useState(false);
-
-
+  const [followStatus, setFollowStatus] = useState(false); // Takip durumu için yeni bir durum
+  const [fallowData,setFallowData] = useState(null);
+  const [fallowId,setFallowId] = useState(null);
   const navigate = useNavigate();
 
   const handleClick = () => {
     navigate("/profileedit");
   }
 
-  const handleFollowClick = () => {
-    setIsFollowing(!isFollowing);
-    setFollowerCount(isFollowing ? followerCount - 1 : followerCount + 1);
-  };
+ 
 
 
 
@@ -41,7 +39,9 @@ const ProfileName = ({ name }) => {
         setUserData(response.data);
         if (response.data && response.data._id) {
           setUserId(response.data._id);
+          setFallowId(response.data.followers)
           setUserIdReady(true);
+
           setLoading(false);
         }
       } catch (error) {
@@ -52,7 +52,7 @@ const ProfileName = ({ name }) => {
   
     fetchUserData();
   }, [name]);
-  
+  console.log(fallowId)
   useEffect(() => {
     const fetchTokenUserData = async () => {
       try {
@@ -76,7 +76,30 @@ const ProfileName = ({ name }) => {
   
     fetchTokenUserData();
   }, [name]);
+  const fetchFollowingData = async () => {
+    try {
+      setLoading(true); // İşlem başlamadan önce yüklenme durumunu aktif et
+      const token = localStorage.getItem('jwt');
+      const response = await axios.post(`http://localhost:3000/kullanici/follow/${name}`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setUserData(response.data);
+      setFollowStatus(true); // Takip işlemi başarılı olduğunda durumu güncelle
+    } catch (error) {
+      console.error('Kullanıcı verilerini alma hatası:', error);
+      setFollowStatus(false); // Takip işlemi hatası durumunda durumu güncelle
+    } finally {
+      setLoading(false); // İşlem tamamlandıktan sonra yüklenme durumunu kapat
+    }
+  };
+
+  const handleFollowClick = () => {
+    fetchFollowingData();
+    
   
+  };
   useEffect(() => {
     if (kullaniciidReady && useridReady) {
       if (kullaniciid === userid) {
@@ -86,6 +109,15 @@ const ProfileName = ({ name }) => {
       }
     }
   }, [kullaniciidReady, useridReady]);
+  useEffect(() => {
+    if (kullaniciidReady && useridReady) {
+      if (userData && userData.followers && userData.followers.includes(userid)) {
+        setFollower(true);
+      } else {
+        setFollower(false);
+      }
+    }
+  }, [kullaniciidReady, useridReady, userData, userid]);
 
 
   if (loading) {
@@ -101,7 +133,7 @@ const ProfileName = ({ name }) => {
   const soyisim = nameParts[1];
   const fullName = `${isim} ${soyisim}`;
  
-
+console.log(userData)
 
   const formatDate = (isoDate) => {
     return format(new Date(isoDate), 'd MMMM yyyy', { locale: tr });
@@ -132,7 +164,7 @@ const ProfileName = ({ name }) => {
           <Flex
             alignItems="center"
             justifyContent="flex-start"
-            pl="30px"
+            pl="20px"
             bg="#58A399"
             w="30%"
             fontWeight="bold"
@@ -141,6 +173,9 @@ const ProfileName = ({ name }) => {
           >
             Çirak
           </Flex>
+          <Flex direction={"column"}>
+            
+          
           {!kullanici && (
             <Button
               size="lg"
@@ -150,9 +185,35 @@ const ProfileName = ({ name }) => {
               leftIcon={<FaUserPlus size="1.5em" />}
               onClick={handleFollowClick}
             >
-              {isFollowing ? "Takipten Çık" : "Takip Et"}
+              {follower ? "Takipten Çık" : "Takip Et"}
             </Button>
           )}
+       <Box
+      pl={"30px"}
+     
+      borderRadius={"10px"}
+      size="lg"
+      direction="row"
+    >
+        <Flex>
+        <Text
+          fontWeight="bold" // Yazıların kalın olmasını sağlar
+          fontSize="lg"     // Yazıların boyutunu ayarlar
+          color="gray.800"  // Yazıların rengini ayarlar
+        >
+          Takipçi sayısı:
+        </Text>
+        <Text
+          fontWeight="bold" // Yazıların kalın olmasını sağlar
+          fontSize="lg"     // Yazıların boyutunu ayarlar
+          color="gray.800"  // Yazıların rengini ayarlar
+          ml={2}            // İkinci Text bileşenine biraz sol marj ekler
+        >
+          {userData && userData.followers ? userData.followers.length : 0}
+        </Text>
+      </Flex>
+    </Box>
+          </Flex>
         </Flex>
       </Flex>
       {kullanici && (

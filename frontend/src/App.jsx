@@ -22,7 +22,6 @@ import Profile from './pages/Profile'
 import ProfileEdit from './pages/ProfileEdit'
 import SoruGüncelle from './components/SoruGüncelle'
 import CevapGuncelle from './components/CevapGuncelle'
-import Login from './pages/login'
 
 
 
@@ -47,7 +46,6 @@ function App() {
       <Route path='/sorusorsayfasi' element={<SoruSorSayfasi/>}/>
       <Route path='/sorugüncelle/:soruid' element={<SoruGüncelle/>}/>
       <Route path='/cevapguncelle/:soruid' element={<CevapGuncelle/>}/>
-      <Route path="/login" element={<Login />} />
 
       <Route path='/profile/:name'  element={<Profile/>}/>
       <Route path='/profileedit' element={<ProfileEdit/>} />
