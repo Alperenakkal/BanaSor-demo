@@ -137,8 +137,10 @@ const searchSorular = async (req, res) => {
       // Hem title hem de content alanlarında arama yapıyoruz.
       const results = await Soru.find({
           $or: [
-              { title: new RegExp(query, 'i') },
-              { content: new RegExp(query, 'i') }
+              { soru: new RegExp(query, 'i') },
+              { dersName: new RegExp(query, 'i') },
+              { dersName: new RegExp(query, 'i') }
+
           ]
       });
       res.json(results);
