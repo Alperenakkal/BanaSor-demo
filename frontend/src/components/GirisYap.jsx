@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 import {
   Box,
   Button,
@@ -14,6 +15,33 @@ import {
 } from '@chakra-ui/react';
 
 function App() {
+  const[username, setUserName]= useState(' ');
+  const [password, setPassword] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:3000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userName: username, password }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Login successful:', data);
+        // Giriş başarılıysa istenen işlemleri gerçekleştirin (örneğin, kullanıcıyı yönlendirin)
+      } else {
+        console.error('Login failed:', response.statusText);
+        // Giriş başarısızsa hata mesajını kullanıcıya gösterin
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      // Hata oluşursa hata mesajını kullanıcıya gösterin
+    }
+  };
+
   return (
   
     <Flex minH={'100vh'} align={'center'} justify={'center'}>
@@ -30,9 +58,9 @@ function App() {
           boxShadow={'lg'}
           p={8}>
           <Stack spacing={4}>
-            <FormControl id="email">
-              <FormLabel>Mail Adresi</FormLabel>
-              <Input type="email" />
+            <FormControl id="userName">
+              <FormLabel>Kullanıcı adı</FormLabel>
+              <Input type="userName" />
             </FormControl>
             <FormControl id="password">
               <FormLabel>Şifre</FormLabel>
