@@ -23,6 +23,9 @@ import ProfileEdit from './pages/ProfileEdit'
 import SoruGüncelle from './components/SoruGüncelle'
 import CevapGuncelle from './components/CevapGuncelle'
 
+import Login from './components/GirisYap'
+
+
 
 
 

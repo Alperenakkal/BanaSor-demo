@@ -127,7 +127,27 @@ const updateSoru = async (req, res) => {
   }
 };
 
+const searchSorular = async (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+      return res.status(400).send('Query parameter q is required');
+  }
+
+  try {
+      // Hem title hem de content alanlarında arama yapıyoruz.
+      const results = await Soru.find({
+          $or: [
+              { title: new RegExp(query, 'i') },
+              { content: new RegExp(query, 'i') }
+          ]
+      });
+      res.json(results);
+  } catch (error) {
+      res.status(500).send('bağlanamadı');
+      console.log(error.message)
+  }
+};
   
 
 
-module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru};
+module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru,searchSorular};
