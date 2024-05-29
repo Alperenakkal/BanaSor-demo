@@ -51,7 +51,7 @@ function App() {
       <Route path='/cevapguncelle/:soruid' element={<CevapGuncelle/>}/>
 
       <Route path='/profile/:name'  element={<Profile/>}/>
-      <Route path='/profileedit' element={<ProfileEdit/>} />
+      <Route path='/profileedit/:userName' element={<ProfileEdit/>} />
 
 
 

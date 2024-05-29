@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Flex,
@@ -14,15 +14,22 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  Spinner,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, SettingsIcon } from "@chakra-ui/icons";
 import { useNavigate } from "react-router-dom";
 import { FaUser } from "react-icons/fa"; // Burada kafa simgesini ekledik
+import axios from "axios";
 
 const Navbar = () => {
   const { isOpen, onToggle } = useDisclosure();
   const [searchText, setSearchText] = useState("");
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [kullaniciid, setKullaniciId] = useState(0);
+  const [userTokenData, setUserTokenData] = useState(null);
+  const [kullaniciidReady, setKullaniciIdReady] = useState(false);
+
 
   const handleClick1 = () => {
     navigate("/");
@@ -40,6 +47,34 @@ const Navbar = () => {
   const handleLogout = () => {
     navigate("/");
   };
+  useEffect(() => {
+    const fetchTokenUserData = async () => {
+      try {
+        const token = localStorage.getItem('jwt');
+        const response = await axios.get(`http://localhost:3000/kullanici/getUser/kayitli`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        setUserTokenData(response.data);
+        if (response.data && response.data._id) {
+          setKullaniciId(response.data._id);
+          setKullaniciIdReady(true);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Kullanıcı verilerini alma hatası:', error);
+        setLoading(false);
+      }
+    };
+    fetchTokenUserData();
+  }, []); // Bağımlılıklar arasından token kaldırıldı
+  
+  
+  
+
+ 
+
 
   return (
     <Box>
@@ -149,16 +184,21 @@ const Navbar = () => {
               _focus={{ boxShadow: "none" }}
             />
             <MenuList>
-              <MenuItem as={"a"} href={"#"}>
-                PROFİL
-              </MenuItem>
+            {userTokenData ? (
+  <MenuItem as={"a"} href={`/profile/${userTokenData.userName}`}>
+    Profilim
+  </MenuItem>
+) : (
+  <Spinner size="sm" />
+)}
+               
               <MenuItem onClick={handleLogout}>ÇIKIŞ YAP</MenuItem>
             </MenuList>
           </Menu>
         </Stack>
       </Flex>
       <Collapse in={isOpen} animateOpacity></Collapse>
-    </Box>
+    </Box >
   );
 };
 
