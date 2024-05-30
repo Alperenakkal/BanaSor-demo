@@ -319,5 +319,5 @@ const yorumSil = async (req, res) => {
 
 
 
-module.exports = { login, logout, signup ,updateUser,getUser,getUserId,followUnFollowUser,getUserJwt};
+module.exports = { login, logout, signup ,updateUser,getUser,getUserId,followUnFollowUser,getUserJwt,yorumEkle,yorumSil};
 

@@ -1,7 +1,7 @@
 const express = require('express');
 
 
-const { login, logout, signup, updateUser ,getUser,getUserId, followUnFollowUser, getUserJwt } = require('../controllers/userController');
+const { login, logout, signup, updateUser ,getUser,getUserId, followUnFollowUser, getUserJwt,yorumEkle,yorumSil } = require('../controllers/userController');
 const upload = require('../utils/mulerConfig'); // Multer yapılandırmasını içe aktar
 const  protectRoute  = require('../middleware/protectRoute');
 const router = express.Router();
@@ -20,8 +20,8 @@ router.put("/updateUser/:userName",upload.single('profilePic') ,updateUser);
 router.post("/follow/:userName",protectRoute,followUnFollowUser);
 router.get("/getUser/kayitli",protectRoute,getUserJwt);
 
-router.post('/:userName/yorum', koruma, yorumEkle);
-router.delete('/:userName/yorum/:yorumId', koruma, yorumSil);
+router.post('/:userName/yorum', yorumEkle);
+router.delete('/:userName/yorum/:yorumId',  yorumSil);
 
 
 
