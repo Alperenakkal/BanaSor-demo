@@ -1,0 +1,8 @@
+{
+    "siniflar": [
+      { "id": 1000, "name": "İlkokul" },
+      { "id": 1001, "name": "Ortaokul" },
+      { "id": 1002, "name": "Lise" },
+      { "id": 1003, "name": "Üniversite" }
+    ]
+  }
