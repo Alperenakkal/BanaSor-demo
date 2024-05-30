@@ -269,6 +269,54 @@ const followUnFollowUser = async (req, res) => {
 
 module.exports = followUnFollowUser;
 
+// Yorum ekleme fonksiyonu
+const yorumEkle = async (req, res) => {
+    try {
+        const { soruId, yorum } = req.body;
+
+        if (!soruId || !yorum) {
+            return res.status(400).json({ error: "Soru ID ve yorum gereklidir" });
+        }
+
+        const yeniYorum = new Yorum({
+            soruId,
+            userId: req.user._id,
+            yorum
+        });
+
+        await yeniYorum.save();
+        res.status(201).json(yeniYorum);
+    } catch (error) {
+        res.status(500).json({ error: "Sunucu hatası" });
+    }
+};
+
+// Yorum silme fonksiyonu
+const yorumSil = async (req, res) => {
+    try {
+        const yorumId = req.params.yorumId;
+
+        if (!yorumId) {
+            return res.status(400).json({ error: "Yorum ID gereklidir" });
+        }
+
+        const yorum = await Yorum.findById(yorumId);
+
+        if (!yorum) {
+            return res.status(404).json({ error: "Yorum bulunamadı" });
+        }
+
+        if (yorum.userId.toString() !== req.user._id.toString()) {
+            return res.status(401).json({ error: "Bu yorumu silmeye yetkiniz yok" });
+        }
+
+        await yorum.remove();
+        res.status(200).json({ message: "Yorum silindi" });
+    } catch (error) {
+        res.status(500).json({ error: "Sunucu hatası" });
+    }
+};
+
 
 
 module.exports = { login, logout, signup ,updateUser,getUser,getUserId,followUnFollowUser,getUserJwt};

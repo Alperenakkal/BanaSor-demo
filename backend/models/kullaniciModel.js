@@ -39,7 +39,11 @@ const userSchema =new mongoose.Schema({
     following: {
         type:[String],
         default: [],
-    }
+    },
+    yorumlar: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Yorum' // Yorum modeline referans veriyoruz
+    }]
 },{timestamps:true});
 const User =mongoose.model("User",userSchema);
 module.exports= User;

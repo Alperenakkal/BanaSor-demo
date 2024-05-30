@@ -6,12 +6,15 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { TimeCal } from './TimeCal';
 import { FaPencilAlt, FaRegStar } from "react-icons/fa";
+import YorumYapma from "./YorumYapma";
 
 const SoruDetay = () => {
     const [soru, setSoru] = useState(null);
+    const [yorumlar, setYorumlar] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [tempRating, setTempRating] = useState(0);
     const [selectedSoruIndex, setSelectedSoruIndex] = useState(null);
+    const [likeCount, setLikeCount] = useState(0); // State for like count
     const navigate = useNavigate();
     const { soruid } = useParams();
 
@@ -34,7 +37,7 @@ const SoruDetay = () => {
         navigate(`/sorugüncelle/${soruid}`);
     };
 
-    const handleClick2 = (name) =>{
+    const handleClick2 = (name) => {
         navigate(`/profile/${name}`)
     }
 
@@ -48,6 +51,13 @@ const SoruDetay = () => {
         setIsOpen(false);
     };
 
+    const handleYorumSubmit = (yeniYorum) => {
+        setYorumlar([...yorumlar, yeniYorum]);
+    };
+
+    const handleYorumSil = (index) => {
+        setYorumlar(yorumlar.filter((_, i) => i !== index));
+    };
     const handleStarClick = (starIndex) => {
         setTempRating(starIndex + 1);
     };
@@ -58,6 +68,10 @@ const SoruDetay = () => {
             selectedRating: tempRating,
         }));
         handleCloseModal();
+    };
+
+    const handleLikeClick = () => {
+        setLikeCount(likeCount + 1); // Increase like count by 1
     };
 
     if (!soru) return <div>Yüklüyor...</div>;
@@ -99,11 +113,14 @@ const SoruDetay = () => {
                                 <Flex>
                                     <Button size="m" marginRight="10px" onClick={handleOpenModal}>
                                         <FaRegStar />
-
                                     </Button>
                                     <Button size="m" marginRight="10px" onClick={() => handleClick3(soru.globalId)}>
                                         <FaPencilAlt />
                                     </Button>
+                                    <Button size="m" onClick={handleLikeClick}> {/* Like button */}
+                                        <Image boxSize={"18px"} src='/like.svg' />
+                                    </Button>
+                                    <Text ml={1}>{likeCount}</Text> {/* Display like count */}
                                 </Flex>
                                 <Modal isOpen={isOpen} onClose={handleCloseModal}>
                                     <ModalOverlay />
@@ -115,7 +132,8 @@ const SoruDetay = () => {
                                                 {[...Array(5)].map((_, starIndex) => (
                                                     <FaRegStar
                                                         key={starIndex}
-                                                        onClick={() => handleStarClick(starIndex)}
+                                                        onClick={() => handleStarClick
+                                                            (starIndex)}
                                                         color={starIndex < tempRating ? 'yellow' : 'gray.300'}
                                                         style={{ cursor: 'pointer' }}
                                                     />
@@ -142,6 +160,7 @@ const SoruDetay = () => {
                                 <Button variant='outline'>
                                     <Image boxSize={"18px"} src='/like.svg' />
                                 </Button>
+                                <Text>{likeCount}</Text> {/* Display like count */}
                                 <Button marginLeft={"auto"} colorScheme='teal' variant='outline'>
                                     Cevapları Gör
                                 </Button>
@@ -149,13 +168,23 @@ const SoruDetay = () => {
                         </Card>
                     </Flex>
                 </Flex>
+                <Flex mt={4}>
+                    <Flex minWidth={"608px"} maxWidth="608px" height="auto" px={4}>
+                        <Card overflow='hidden' variant='outline' sx={{ minWidth: '608px', maxWidth: '608px', minHeight: '200px' }}>
+                            <CardBody>
+                                <YorumYapma onYorumSubmit={handleYorumSubmit} />
+                                {yorumlar.map((yorum, index) => (
+                                    <Card key={index} mt={2} p={4} width="100%" variant='outline'>
+                                        <Text>{yorum}</Text>
+                                    </Card>
+                                ))}
+                            </CardBody>
+                        </Card>
+                    </Flex>
+                </Flex>
             </Flex>
             <Flex pl={"100px"}>
-
                 <Image w={"10px"} h="10px" src='/alperen.img' />
-
-               
-
             </Flex>
         </Flex>
     );
