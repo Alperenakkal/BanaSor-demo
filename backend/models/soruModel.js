@@ -21,6 +21,14 @@ const soruSchema = new Schema({
         type:String 
         
     },
+    totalPoints: { 
+        type: Number, 
+        default: 0 
+    },
+    voteCount: {
+         type: Number,
+          default: 0 
+        },
     cevaplar: [{
      
             type:mongoose.Schema.Types.ObjectId,
@@ -31,6 +39,17 @@ const soruSchema = new Schema({
       }]
 
     },{timestamps:true});
+
+    soruSchema.methods.addVote = function(points) {
+        this.totalPoints += points;
+        this.voteCount += 1;
+        return this.save();
+    };
+    
+    soruSchema.methods.getAverageRating = function() {
+        if (this.voteCount === 0) return 0;
+        return this.totalPoints / this.voteCount;
+    };
 
 const Soru = model('Soru', soruSchema);
 module.exports= Soru;

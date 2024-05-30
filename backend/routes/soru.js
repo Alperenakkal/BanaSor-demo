@@ -1,6 +1,6 @@
 // routes/products.js
 const express = require('express');
-const {  getSoruByDers, getUserSoru, soruSor, getSorular, updateSoru, searchSorular } = require('../controllers/soruController');
+const {  getSoruByDers, getUserSoru, soruSor, getSorular, updateSoru, searchSorular, addRating } = require('../controllers/soruController');
 const protectRoute = require('../middleware/protectRoute');
 const upload = require('../utils/mulerConfig');
 const router = express.Router();
@@ -12,7 +12,9 @@ router.get('/user/:userName',getUserSoru)
 router.post('/sor',protectRoute, upload.single('soruPic') ,soruSor)
 router.get('/sorular',getSorular)
 router.put('/guncelle/:soruId',updateSoru)
-router.get('/search', searchSorular);
+router.get('/search', searchSorular)
+router.put('/rate/:questionId',addRating)
+
 
 
 

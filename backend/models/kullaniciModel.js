@@ -36,10 +36,21 @@ const userSchema =new mongoose.Schema({
         default : [],
 
     },
+    
     following: {
         type:[String],
         default: [],
-    }
+    },
+
+    totalPoints: { type: Number, default: 0 },
+    voteCount: { type: Number, default: 0 }
+  
 },{timestamps:true});
+
+userSchema.methods.addPoints = function(points) {
+    this.totalPoints += points;
+    this.voteCount += 1;
+    return this.save();
+};
 const User =mongoose.model("User",userSchema);
 module.exports= User;
