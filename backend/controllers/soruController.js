@@ -17,6 +17,18 @@ const getSoruByDers = async (req,res) =>{
     console.log("Error in getSoruByDers controller:", error.message);
     res.status(500).json({ error: "Internal server error" });
 }}
+const getSoruById = async (req,res) =>{
+  try {
+  const soruid = req.params.soruid;
+  const soru = await Soru.findById(soruid)
+  if (!soru) {
+      return res.status(400).json({ error: "soru bulunamadi" });
+  }
+  res.status(200).json(soru);
+} catch (error) {
+  console.log("Error in getSoruByDers controller:", error.message);
+  res.status(500).json({ error: "Internal server error" });
+}}
 const getUserSoru = async (req, res) => {
     try {
       const username = req.params.userName;
@@ -178,4 +190,4 @@ const addRating = async (req, res) => {
   
 
 
-module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru,searchSorular, addRating};
+module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru,searchSorular,getSoruById,addRating};
