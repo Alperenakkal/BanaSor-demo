@@ -18,6 +18,8 @@ import { useNavigate, useParams } from "react-router-dom";
 const ProfileEdit = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [profilePicPreview, setProfilePicPreview] = useState(null); // Yeni state ekleyin
+
   const navigate = useNavigate();
   const { userName } = useParams(); // useParams hook returns an object, so destructure it directly
   const toast = useToast();
@@ -63,7 +65,11 @@ const ProfileEdit = () => {
   };
 
   const handleFileChange = (e) => {
-    setProfilePic(e.target.files[0]);
+    const file = e.target.files[0];
+    if (file) {
+      setProfilePic(file);
+      setProfilePicPreview(URL.createObjectURL(file)); // Geçici URL oluştur
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -87,7 +93,7 @@ const ProfileEdit = () => {
     formData.append('gender', user.gender);
     formData.append('seviye', user.seviye);
     if (profilePic) {
-      formData.append('file', profilePic);
+      formData.append('profilePic', profilePic);
     }
 
     try {
@@ -200,7 +206,7 @@ const ProfileEdit = () => {
           <FormControl id="profile-photo">
             <FormLabel>Profil Fotoğrafı</FormLabel>
             <Stack direction="row" spacing={4} align="center">
-              <Avatar src={userData?.profilePic || ''} />
+              <Avatar src={profilePicPreview || userData?.profilePic || ''} /> {/* Profil fotoğrafı önizleme */}
               <Button as="label">
                 Yükle <Input type="file" hidden accept="image/*" onChange={handleFileChange} />
               </Button>

@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const generateTokenAndSetCookie = require('../utils/generateTokenAndSetCookie.js');
 const cloudinary = require('cloudinary').v2;
-
+const fs =require('fs');
 const storage = multer.memoryStorage(); // Dosyaları bellek üzerinde tutmak için
 const upload = multer({ storage: storage });
 // Login fonksiyonu
@@ -15,7 +15,7 @@ const login = async (req, res) => {
     try {
         const { userName, password } = req.body;
 
-        console.log('Login attempt:', { userName, password }); // Gelen verileri loglayın
+   
 
         if (!userName || !password) {
             return res.status(400).json({ error: "Username and password are required" });
@@ -77,12 +77,12 @@ const getUser = async (req, res) => {
 const getUserJwt = async(req,res)=>{
 try {
         const id = req.user._id;
-        console.log("Received ID:", id); // ID'yi loglayın
+      
 
       
 
         const user = await User.findById(id);
-        console.log("User found:", user); // Bulunan kullanıcıyı loglayın
+       
 
         if (!user) {
             return res.status(404).json({ error: "Giris Yapılmamis" });
@@ -98,7 +98,7 @@ try {
 const getUserId = async (req, res) => {
     try {
         const id = req.params.id;
-        console.log("Received ID:", id); // ID'yi loglayın
+     
 
         // ID'nin geçerli bir MongoDB ObjectId olup olmadığını kontrol edin
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -106,7 +106,7 @@ const getUserId = async (req, res) => {
         }
 
         const user = await User.findById(id);
-        console.log("User found:", user); // Bulunan kullanıcıyı loglayın
+    
 
         if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -141,6 +141,7 @@ const signup = async (req, res) => {
                 folder: 'profile_pics'
             });
             profilePicUrl = result.secure_url;
+           
         } else {
             profilePicUrl = gender === 'male' 
                 ? `https://avatar.iran.liara.run/public/boy?username=${userName}`
@@ -169,6 +170,7 @@ const signup = async (req, res) => {
                 profilePic: newUser.profilePic,
                 seviye:newUser.seviye
             });
+            fs.unlinkSync(profilePicUrl);
         } else {
             res.status(400).json({ error: "Invalid user data" });
         }
@@ -222,11 +224,15 @@ const updateUser = async function (req, res) {
                 : `https://avatar.iran.liara.run/public/girl?username=${userName}`;
         }
 
+        // Profil resmini güncelle
+        user.profilePic = profilePicUrl;
+
         // Kullanıcıyı kaydet
         user = await user.save();
-
+        fs.unlinkSync(profilePicUrl);
         // Güncellenmiş kullanıcı bilgilerini JSON formatında döndür
         return res.status(200).json(user);
+
     } catch (error) {
         res.status(400).json({ error: "Güncelleme başarısız" });
         console.error(error.message);
