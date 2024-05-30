@@ -8,7 +8,7 @@ import { tr } from 'date-fns/locale';
 
 const ProfileName = ({ name }) => {
   const [isFollowing, setIsFollowing] = useState(false);
-  const [followerCount, setFollowerCount] = useState(0);
+  const [follower, setFollower] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [kullanici, setKullanici] = useState(false);
@@ -17,18 +17,16 @@ const ProfileName = ({ name }) => {
   const [userTokenData, setUserTokenData] = useState(null);
   const [kullaniciidReady, setKullaniciIdReady] = useState(false);
   const [useridReady, setUserIdReady] = useState(false);
-
-
+  const [followStatus, setFollowStatus] = useState(false); // Takip durumu için yeni bir durum
+  const [fallowData,setFallowData] = useState(null);
+  const [fallowId,setFallowId] = useState(null);
   const navigate = useNavigate();
 
-  const handleClick = () => {
-    navigate("/profileedit");
+  const handleClick = (userName) => {
+    navigate(`/profileedit/${userName}`);
   }
 
-  const handleFollowClick = () => {
-    setIsFollowing(!isFollowing);
-    setFollowerCount(isFollowing ? followerCount - 1 : followerCount + 1);
-  };
+ 
 
 
 
@@ -41,7 +39,9 @@ const ProfileName = ({ name }) => {
         setUserData(response.data);
         if (response.data && response.data._id) {
           setUserId(response.data._id);
+          setFallowId(response.data.followers)
           setUserIdReady(true);
+
           setLoading(false);
         }
       } catch (error) {
@@ -49,10 +49,9 @@ const ProfileName = ({ name }) => {
         setLoading(false);
       }
     };
-  
-    fetchUserData();
-  }, [name]);
-  
+  fetchUserData();
+  }, []);
+
   useEffect(() => {
     const fetchTokenUserData = async () => {
       try {
@@ -73,10 +72,34 @@ const ProfileName = ({ name }) => {
         setLoading(false);
       }
     };
+  fetchTokenUserData()
+    
+  },[]); // Token bağımlılığı eklendi
+  const fetchFollowingData = async () => {
+    try {
+      setLoading(true); // İşlem başlamadan önce yüklenme durumunu aktif et
+      const token = localStorage.getItem('jwt');
+      const response = await axios.post(`http://localhost:3000/kullanici/follow/${name}`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setUserData(response.data);
+      setFollowStatus(true); // Takip işlemi başarılı olduğunda durumu güncelle
+    } catch (error) {
+      console.error('Kullanıcı verilerini alma hatası:', error);
+      setFollowStatus(false); // Takip işlemi hatası durumunda durumu güncelle
+    } finally {
+      setLoading(false); // İşlem tamamlandıktan sonra yüklenme durumunu kapat
+      window.location.reload()
+    }
+  };
+
+  const handleFollowClick = () => {
+    fetchFollowingData();
+    
   
-    fetchTokenUserData();
-  }, [name]);
-  
+  };
   useEffect(() => {
     if (kullaniciidReady && useridReady) {
       if (kullaniciid === userid) {
@@ -86,7 +109,15 @@ const ProfileName = ({ name }) => {
       }
     }
   }, [kullaniciidReady, useridReady]);
-
+  useEffect(() => {
+    if (kullaniciidReady && useridReady) {
+      if (userData && userData.followers && userData.followers.includes(kullaniciid)) {
+        setFollower(true);
+      } else {
+        setFollower(false);
+      }
+    }
+  }, [kullaniciidReady, useridReady, userData, userid]);
 
   if (loading) {
     return <Spinner />;
@@ -96,17 +127,24 @@ const ProfileName = ({ name }) => {
     return <Text>User data could not be loaded.</Text>;
   }
 
-  const nameParts = userData.fullName.split(" ");
-  const isim = nameParts[0];
-  const soyisim = nameParts[1];
-  const fullName = `${isim} ${soyisim}`;
+  let fullName = '';
+  let isim = '';
+  let soyisim = '';
+  
+  if (userData && userData.fullName) {
+    const nameParts = userData.fullName.split(" ");
+    isim = nameParts[0];
+    soyisim = nameParts[1] || '';  // soyisim boş olabilir
+    fullName = `${isim} ${soyisim}`;
+  } else {
+    // Varsayılan değerler atanabilir
+    fullName = 'Ad Soyad';
+  }
  
-
 
   const formatDate = (isoDate) => {
     return format(new Date(isoDate), 'd MMMM yyyy', { locale: tr });
   };
-  
   return (
     <Flex
       direction="column"
@@ -132,7 +170,7 @@ const ProfileName = ({ name }) => {
           <Flex
             alignItems="center"
             justifyContent="flex-start"
-            pl="30px"
+            pl="20px"
             bg="#58A399"
             w="30%"
             fontWeight="bold"
@@ -141,6 +179,9 @@ const ProfileName = ({ name }) => {
           >
             Çirak
           </Flex>
+          <Flex direction={"column"}>
+            
+          
           {!kullanici && (
             <Button
               size="lg"
@@ -150,14 +191,46 @@ const ProfileName = ({ name }) => {
               leftIcon={<FaUserPlus size="1.5em" />}
               onClick={handleFollowClick}
             >
-              {isFollowing ? "Takipten Çık" : "Takip Et"}
+              {follower ? "Takipten Çık" : "Takip Et"}
             </Button>
           )}
+       <Box
+      pl={"30px"}
+     
+      borderRadius={"10px"}
+      size="lg"
+      direction="row"
+    >
+        <Flex>
+        <Text
+          fontWeight="bold" // Yazıların kalın olmasını sağlar
+          fontSize="lg"     // Yazıların boyutunu ayarlar
+          color="gray.800"  // Yazıların rengini ayarlar
+        >
+          Takipçi sayısı:
+        </Text>
+        <Text
+          fontWeight="bold" // Yazıların kalın olmasını sağlar
+          fontSize="lg"     // Yazıların boyutunu ayarlar
+          color="gray.800"  // Yazıların rengini ayarlar
+          ml={2}            // İkinci Text bileşenine biraz sol marj ekler
+        >
+          {userData && userData.followers ? userData.followers.length : 0}
+        </Text>
+      </Flex>
+    </Box>
+          </Flex>
         </Flex>
       </Flex>
       {kullanici && (
         <Flex alignItems="flex-start" mt="30px">
-          <Button width="300px" borderRadius="30px" fontWeight="bold" gap={2} onClick={handleClick}>
+<Button
+  width="300px"
+  borderRadius="30px"
+  fontWeight="bold"
+  gap={2}
+  onClick={() => handleClick(userData && userData.userName ? userData.userName : "boyle bir kullanici yok")}
+>
             <FaPencilAlt />
             Profili Düzenle
           </Button>
@@ -174,7 +247,7 @@ const ProfileName = ({ name }) => {
         <Flex mt="20px" gap={3}>
           <Flex fontWeight="bold" fontSize="25px"><FaCalendarAlt /></Flex>
           <Flex fontWeight="light">Katılma Tarihi:</Flex>
-          <Flex fontWeight="bold">{formatDate(userData.updatedAt)}</Flex>
+          <Flex fontWeight="bold">{formatDate(userData && userData.createdAt ?  userData.createdAt:0)}</Flex>
         </Flex>
       </Flex>
     </Flex>

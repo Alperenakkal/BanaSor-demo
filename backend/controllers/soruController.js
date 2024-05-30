@@ -17,6 +17,18 @@ const getSoruByDers = async (req,res) =>{
     console.log("Error in getSoruByDers controller:", error.message);
     res.status(500).json({ error: "Internal server error" });
 }}
+const getSoruById = async (req,res) =>{
+  try {
+  const soruid = req.params.soruid;
+  const soru = await Soru.findById(soruid)
+  if (!soru) {
+      return res.status(400).json({ error: "soru bulunamadi" });
+  }
+  res.status(200).json(soru);
+} catch (error) {
+  console.log("Error in getSoruByDers controller:", error.message);
+  res.status(500).json({ error: "Internal server error" });
+}}
 const getUserSoru = async (req, res) => {
     try {
       const username = req.params.userName;
@@ -127,7 +139,27 @@ const updateSoru = async (req, res) => {
   }
 };
 
+const searchSorular = async (req, res) => {
+  const query = req.query.q;
+  if (!query) {
+      return res.status(400).send('Query parameter q is required');
+  }
+
+  try {
+      // Hem title hem de content alanlarında arama yapıyoruz.
+      const results = await Soru.find({
+          $or: [
+              { title: new RegExp(query, 'i') },
+              { content: new RegExp(query, 'i') }
+          ]
+      });
+      res.json(results);
+  } catch (error) {
+      res.status(500).send('bağlanamadı');
+      console.log(error.message)
+  }
+};
   
 
 
-module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru};
+module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru,searchSorular,getSoruById};

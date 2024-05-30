@@ -182,32 +182,34 @@ const signup = async (req, res) => {
 
 const updateUser = async function (req, res) {
     try {
-        // form-data'dan verileri alın
-        let { fullName, userName, email, password, gender, } = req.body;
+        // Form verilerini al
+        let { fullName, userName, email, password, gender, seviye } = req.body;
 
+        // Kullanıcı adını al ve filtreleme objesini oluştur
         let username = req.params.userName;
-        let filter = { userName: username }; // Filtreleme objesinde düzeltme yapıldı
+        let filter = { userName: username };
 
+        // Kullanıcıyı veritabanından bul
         let user = await User.findOne(filter);
         if (!user) {
-            return res.status(400).json({ error: "user not found" });
+            return res.status(400).json({ error: "Kullanıcı bulunamadı" });
         }
 
-        // Şifreyi hash'leyin
+        // Eğer yeni şifre verilmişse, şifreyi hash'le
         if (password) {
             let salt = await bcrypt.genSalt(10);
             let hashedPassword = await bcrypt.hash(password, salt);
             user.password = hashedPassword;
         }
 
-        // Kullanıcı bilgilerini güncelleyin
+        // Kullanıcı bilgilerini güncelle
         user.fullName = fullName || user.fullName;
         user.userName = userName || user.userName;
         user.email = email || user.email;
         user.gender = gender || user.gender;
-        
+        user.seviye = seviye || user.seviye; // Seviye değerini güncelle
 
-       
+        // Profil resmi URL'sini belirle
         let profilePicUrl = '';
         if (req.file) {
             const result = await cloudinary.uploader.upload(req.file.path, {
@@ -219,12 +221,15 @@ const updateUser = async function (req, res) {
                 ? `https://avatar.iran.liara.run/public/boy?username=${userName}`
                 : `https://avatar.iran.liara.run/public/girl?username=${userName}`;
         }
+
+        // Kullanıcıyı kaydet
         user = await user.save();
 
-        return res.status(200).json(user); // Görüntülenecek kullanıcı bilgileri JSON formatında döndürülüyor
+        // Güncellenmiş kullanıcı bilgilerini JSON formatında döndür
+        return res.status(200).json(user);
     } catch (error) {
         res.status(400).json({ error: "Güncelleme başarısız" });
-        console.log(error.message);
+        console.error(error.message);
     }
 };
 const followUnFollowUser = async (req, res) => {

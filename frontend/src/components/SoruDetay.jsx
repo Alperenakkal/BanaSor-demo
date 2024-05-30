@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
     Card, Text, Flex, Avatar, Button, Box, Image, CardBody, CardFooter, Modal,
     ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter
@@ -18,16 +18,11 @@ const SoruDetay = () => {
     const navigate = useNavigate();
     const { soruid } = useParams();
 
-    useEffect(() => {
-        fetch('/sorular.json')
-            .then(response => response.json())
-            .then(data => {
-                const bulunanSoru = data.sorular
-                    .flatMap(ders => ders.sorular.map(soru => ({ ...soru, dersIsim: ders.isim })))
-                    .find(soru => soru.globalId === parseInt(soruid));
-                setSoru(bulunanSoru);
-            });
-    }, [soruid]);
+  // Geçen zamanın gün, saat, dakika veya saniye cinsine dönüştürülmesi
+  const timeDifferenceInSeconds = Math.floor(timeDifferenceInMilliseconds / 1000);
+  const timeDifferenceInMinutes = Math.floor(timeDifferenceInMilliseconds / (1000 * 60));
+  const timeDifferenceInHours = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60));
+  const timeDifferenceInDays = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
 
     const handleClick = (konu) => {
         navigate(`/konu/${konu}`);
