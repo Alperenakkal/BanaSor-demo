@@ -14,7 +14,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 
-function App() {
+function GirisYap() {
   const[username, setUserName]= useState(' ');
   const [password, setPassword] = useState('');
 
@@ -90,4 +90,4 @@ function App() {
   );
 }
 
-export default App;
+export default GirisYap;

@@ -1,7 +1,7 @@
 // routes/products.js
 const express = require('express');
 
-const {  getSoruByDers, getUserSoru, soruSor, getSorular, updateSoru, searchSorular, addRating } = require('../controllers/soruController');
+const {  getSoruByDers, getUserSoru, soruSor, getSorular, updateSoru, searchSorular, addRating, getSoruById } = require('../controllers/soruController');
 
 
 const protectRoute = require('../middleware/protectRoute');

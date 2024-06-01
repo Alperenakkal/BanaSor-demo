@@ -8,7 +8,7 @@ import { tr } from 'date-fns/locale';
 
 const ProfileName = ({ name }) => {
   const [isFollowing, setIsFollowing] = useState(false);
-  const [follower, setFollower] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [kullanici, setKullanici] = useState(false);
@@ -17,16 +17,27 @@ const ProfileName = ({ name }) => {
   const [userTokenData, setUserTokenData] = useState(null);
   const [kullaniciidReady, setKullaniciIdReady] = useState(false);
   const [useridReady, setUserIdReady] = useState(false);
+  const [follower,setFollower] =useState(false)
   const [followStatus, setFollowStatus] = useState(false);
   const [fallowData, setFallowData] = useState(null);
   const [fallowId, setFallowId] = useState(null);
+
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedOptions, setSelectedOptions] = useState([]);
 
-  const handleClick = (userName) => {
-    navigate(`/profileedit/${userName}`);
+  const handleClick = () => {
+    navigate("/profileedit");
   }
+
+  const handleFollowClick = () => {
+    setIsFollowing(!isFollowing);
+    setFollowerCount(isFollowing ? followerCount - 1 : followerCount + 1);
+  };
+
+
+
+  
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -35,8 +46,13 @@ const ProfileName = ({ name }) => {
         setUserData(response.data);
         if (response.data && response.data._id) {
           setUserId(response.data._id);
+
           setFallowId(response.data.followers);
           setUserIdReady(true);
+
+          setUserIdReady(true);
+          setLoading(false);
+
         }
       } catch (error) {
         console.error('Kullanıcı verilerini alma hatası:', error);
@@ -44,8 +60,10 @@ const ProfileName = ({ name }) => {
         setLoading(false);
       }
     };
+
     fetchUserData();
   }, [name]);
+
 
   useEffect(() => {
     const fetchTokenUserData = async () => {
@@ -67,6 +85,7 @@ const ProfileName = ({ name }) => {
         setLoading(false);
       }
     };
+
     fetchTokenUserData();
   }, []); 
 
@@ -88,14 +107,13 @@ const ProfileName = ({ name }) => {
     }
   };
 
-  const handleFollowClick = () => {
-    fetchFollowingData();
-  };
+
 
   useEffect(() => {
     if (kullaniciidReady && useridReady) {
       setKullanici(kullaniciid === userid);
     }
+
   }, [kullaniciidReady, useridReady, kullaniciid, userid]);
 
   useEffect(() => {
@@ -103,6 +121,7 @@ const ProfileName = ({ name }) => {
       setFollower(userData?.followers?.includes(kullaniciid));
     }
   }, [kullaniciidReady, useridReady, userData, kullaniciid]);
+
 
   if (loading) {
     return <Spinner />;
@@ -154,7 +173,7 @@ const ProfileName = ({ name }) => {
           <Flex
             alignItems="center"
             justifyContent="flex-start"
-            pl="20px"
+            pl="30px"
             bg="#58A399"
             w="30%"
             fontWeight="bold"
@@ -163,6 +182,7 @@ const ProfileName = ({ name }) => {
           >
             Çirak
           </Flex>
+
           <Flex direction="column">
             {!kullanici && (
               <Button
@@ -185,10 +205,12 @@ const ProfileName = ({ name }) => {
               </Flex>
             </Box>
           </Flex>
+
         </Flex>
       </Flex>
       {kullanici ? (
         <Flex alignItems="flex-start" mt="30px">
+
           <Button
             width="300px"
             borderRadius="30px"
@@ -196,6 +218,7 @@ const ProfileName = ({ name }) => {
             gap={2}
             onClick={() => handleClick(userData.userName)}
           >
+
             <FaPencilAlt />
             Profili Düzenle
           </Button>
@@ -256,9 +279,11 @@ const ProfileName = ({ name }) => {
           <Text fontWeight="bold">{userData.seviye}</Text>
         </Flex>
         <Flex mt="20px" gap={3}>
+
           <FaCalendarAlt fontSize="25px" />
           <Text fontWeight="light">Katılma Tarihi:</Text>
           <Text fontWeight="bold">{formatDate(userData.createdAt)}</Text>
+
         </Flex>
       </Flex>
     </Flex>
