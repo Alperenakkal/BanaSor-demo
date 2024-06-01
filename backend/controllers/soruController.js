@@ -151,8 +151,10 @@ const searchSorular = async (req, res) => {
       // Hem title hem de content alanlarında arama yapıyoruz.
       const results = await Soru.find({
           $or: [
-              { title: new RegExp(query, 'i') },
-              { content: new RegExp(query, 'i') }
+              { soru: new RegExp(query, 'i') },
+              { dersName: new RegExp(query, 'i') },
+              { dersName: new RegExp(query, 'i') }
+
           ]
       });
       res.json(results);
@@ -161,7 +163,33 @@ const searchSorular = async (req, res) => {
       console.log(error.message)
   }
 };
+
+
+
+const addRating = async (req, res) => {
+  try {
+      const { questionId } = req.params;
+      const { points } = req.body;
+
+      if (!points || points < 1 || points > 5) {
+          return res.status(400).json({ error: 'Invalid points. Points should be between 1 and 5.' });
+      }
+
+      const question = await Soru.findById(questionId);
+      if (!question) {
+          return res.status(404).json({ error: 'Question not found.' });
+      }
+
+      await question.addVote(points);
+      const averageRating = question.getAverageRating();
+
+      res.json({ averageRating, voteCount: question.voteCount });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
   
 
 
-module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru,searchSorular,getSoruById};
+module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru,searchSorular,getSoruById,addRating};

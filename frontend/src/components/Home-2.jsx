@@ -4,7 +4,6 @@ import { ArrowBackIcon, ArrowForwardIcon, StarIcon } from '@chakra-ui/icons';
 import { Flex, Box, WrapItem, Wrap, Stack, useColorModeValue, Button, Divider, } from '@chakra-ui/react';
 import { Text } from '@chakra-ui/react';
 import { Avatar, AvatarBadge, AvatarGroup } from '@chakra-ui/react'
-import { CheckCircleIcon } from '@chakra-ui/icons';
 
 
 
@@ -136,26 +135,6 @@ const Home2 = () => {
     <Flex flexDirection="column">
 
       <Divider m={1} borderColor={"#58A399"} borderWidth={"2px"} />
-      <Box textAlign="center" mt={6}>
-  <Flex justifyContent="space-between" align="center" maxW="4xl" mx="auto" p={4} borderWidth="1px" borderRadius="lg" boxShadow="lg" h="400px">
-    <Box w="60%">
-      <Text fontSize="4xl" fontWeight="bold" color="black" mb={6}>
-        Cevaplar ile yetinme, öğrenmeye başla.
-      </Text>
-      <Text fontSize="lg" color="gray.600" mt={3}>
-        Brainly, en zorlu ödevleri çözmek için bir araya gelmiş milyonlarca öğrencinin ve uzmanın yer aldığı bir bilgi paylaşım platformudur.
-      </Text>
-      <Flex justifyContent="center" alignItems="center" mt={6}>
-        <Button colorScheme="blue" size="lg">
-          Sign in with Google
-        </Button>
-      </Flex>
-    </Box>
-    <Flex direction="column" alignItems="center" justifyContent="center" marginRight={'20px'} marginTop={'60px'}>
-      <CheckCircleIcon boxSize={170} color="blue.500" />
-    </Flex>
-  </Flex>
-</Box>
 
       <Text mt="105px" textAlign="center" fontWeight="bold" fontFamily="Nunito, sans-serif" fontSize="39px" lineHeight="44px">
         Eğitimde Yenilik, Ödevde Kolaylık
@@ -202,3 +181,4 @@ const Home2 = () => {
 
 }
 export default Home2
+

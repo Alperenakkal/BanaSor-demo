@@ -140,13 +140,8 @@ const Alperen = () => {
                             variant="unstyled"
                             alignItems="center"
                             onClick={() => handleClick(ders.name)}
-                            mr="10px"
-                            ml="10px"
-                            
-                            
-                            
                         >
-                            <Flex direction="column" alignItems="center" gap={3}>
+                            <Flex direction="column" alignItems="center" gap={2}>
                                 <Image src={`/derslerimg/${ders.icon}`} boxSize="50px" />
                                 <Box fontSize="12px" fontFamily="ProximaNova, Helvetica, Arial, sans-serif" textAlign="center" mt={2}>
                                     {ders.name}

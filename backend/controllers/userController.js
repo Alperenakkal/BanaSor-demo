@@ -278,9 +278,25 @@ const followUnFollowUser = async (req, res) => {
     }
 };
 
+const getTopUsers = async (req, res) => {
+    try {
+        const users = await User.find().sort({ totalPoints: -1 }).limit(10);
+        const response = users.map(user => ({
+            userName: user.userName,
+            totalPoints: user.totalPoints,
+            voteCount: user.voteCount
+        }));
+        res.json(response);
+    } catch (error) {
+        res.status(500).json({ error: "bağlanamadı"});
+        console.log(error.message)
+    }
+};
+
+
 module.exports = followUnFollowUser;
 
 
 
-module.exports = { login, logout, signup ,updateUser,getUser,getUserId,followUnFollowUser,getUserJwt};
+module.exports = { login, logout, signup ,updateUser,getUser,getUserId,getUserJwt,getTopUsers};
 

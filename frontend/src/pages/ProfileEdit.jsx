@@ -1,21 +1,21 @@
 import {
-  Box,
-  Button,
-  FormControl,
-  FormLabel,
-  Input,
-  Stack,
-  Avatar,
-  useToast,
-  Select,
-  Flex,
-  Heading,
-} from "@chakra-ui/react";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+    Box,
+    Button,
+    FormControl,
+    FormLabel,
+    Input,
+    Stack,
+    Avatar,
+    useToast,
+    Select,
+    Flex,
+    Heading,
+} from '@chakra-ui/react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const ProfileEdit = () => {
+<<<<<<< HEAD
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profilePicPreview, setProfilePicPreview] = useState(null); // Yeni state ekleyin
@@ -32,30 +32,24 @@ const ProfileEdit = () => {
     seviye: "",
   });
   const [profilePic, setProfilePic] = useState(null);
+=======
+    const navigate = useNavigate();
+    const toast = useToast();
+    const [user, setUser] = useState({
+        isim: '',
+        soyisim: '',
+        email: '',
+        password: '',
+        seviye: '',
+    });
+>>>>>>> ec45447b99e1bc47bc9383d7d8e5ce43e354653b
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3000/kullanici/getUser/username/${userName}`);
-        setUserData(response.data);
-
-        if (response.data) {
-          setUser({
-            fullName: response.data.fullName || "",
-            userName: response.data.userName || "",
-            email: response.data.email || "",
-            password: "",
-            gender: response.data.gender || "",
-            seviye: response.data.seviye || "Seviye Belirtilmemiş",
-          });
-        }
-      } catch (error) {
-        console.error('Kullanıcı verilerini alma hatası:', error);
-      } finally {
-        setLoading(false);
-      }
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setUser(prev => ({ ...prev, [name]: value }));
     };
 
+<<<<<<< HEAD
     fetchUserData();
   }, [userName]);
 
@@ -102,95 +96,82 @@ const ProfileEdit = () => {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`
+=======
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!user.isim.trim() || !user.soyisim.trim() || !user.email.trim() || !user.password.trim() || !user.seviye) {
+            toast({
+                title: "Hata",
+                description: "Lütfen tüm alanları doldurun.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+>>>>>>> ec45447b99e1bc47bc9383d7d8e5ce43e354653b
         }
-      });
-      toast({
-        title: "Profil Güncellendi",
-        description: "Profiliniz başarıyla güncellendi.",
-        status: "success",
-        duration: 9000,
-        isClosable: true,
-      });
-      navigate(`/profile/${user.userName}`);
-    } catch (error) {
-      console.error('Güncelleme hatası:', error);
-      toast({
-        title: "Güncelleme Hatası",
-        description: "Profil güncellemesi başarısız oldu.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    }
-  };
+        toast({
+            title: "Profil Güncellendi",
+            description: "Profiliniz başarıyla güncellendi.",
+            status: "success",
+            duration: 9000,
+            isClosable: true,
+        });
+        navigate("/profile");
+    };
 
-  if (loading) {
-    return <Box>Loading...</Box>;
-  }
+    return (
+        <Flex direction="column">
+            <Box maxW="md" w="1000px" mx="auto" p={5} bg="gray.100">
+                <Heading as="h1" size="xl" textAlign="center" mb={6}>
+                    Profili Güncelle
+                </Heading>
 
-  return (
-    <Flex direction="column">
-      <Box maxW="md" w="1000px" mx="auto" p={5} bg="gray.100">
-        <Heading as="h1" size="xl" textAlign="center" mb={6}>
-          PROFİLİ GÜNCELLE
-        </Heading>
+                <Stack spacing={4} as="form" onSubmit={handleSubmit}>
+                    <FormControl id="isim">
+                        <FormLabel>İsim</FormLabel>
+                        <Input name="isim" type="text" value={user.isim} onChange={handleChange} />
+                    </FormControl>
 
-        <Stack spacing={4} as="form" onSubmit={handleSubmit}>
-          <FormControl id="fullName">
-            <FormLabel>Ad Soyad</FormLabel>
-            <Input
-              name="fullName"
-              type="text"
-              value={user.fullName}
-              onChange={handleChange}
-            />
-          </FormControl>
+                    <FormControl id="soyisim">
+                        <FormLabel>Soyisim</FormLabel>
+                        <Input name="soyisim" type="text" value={user.soyisim} onChange={handleChange} />
+                    </FormControl>
 
-          <FormControl id="userName">
-            <FormLabel>Kullanıcı Adı</FormLabel>
-            <Input
-              name="userName"
-              type="text"
-              value={user.userName}
-              onChange={handleChange}
-            />
-          </FormControl>
+                    <FormControl id="email">
+                        <FormLabel>Email</FormLabel>
+                        <Input name="email" type="email" value={user.email} onChange={handleChange} />
+                    </FormControl>
 
-          <FormControl id="email">
-            <FormLabel>Email</FormLabel>
-            <Input
-              name="email"
-              type="email"
-              value={user.email}
-              onChange={handleChange}
-            />
-          </FormControl>
+                    <FormControl id="password">
+                        <FormLabel>Şifre</FormLabel>
+                        <Input name="password" type="password" value={user.password} onChange={handleChange} />
+                    </FormControl>
 
-          <FormControl id="password">
-            <FormLabel>Şifre</FormLabel>
-            <Input
-              name="password"
-              type="password"
-              value={user.password}
-              onChange={handleChange}
-            />
-          </FormControl>
+                    <FormControl id='seviye'>
+                        <FormLabel>Seviye</FormLabel>
+                        <Select name='seviye' placeholder='Seviye Seç' value={user.seviye} onChange={handleChange}>
+                            <option value="İlkokul">İlkokul</option>
+                            <option value="Ortaokul">Ortaokul</option>
+                            <option value="Lise">Lise</option>
+                            <option value="Üniversite">Üniversite</option>
+                            <option value="Mezun">Mezun</option>
+                        </Select>
+                    </FormControl>
 
-          <FormControl id="seviye">
-            <FormLabel>Seviye</FormLabel>
-            <Select
-              name="seviye"
-              value={user.seviye}
-              onChange={handleChange}
-            >
-              <option value="İlkokul">İlkokul</option>
-              <option value="Ortaokul">Ortaokul</option>
-              <option value="Lise">Lise</option>
-              <option value="Üniversite">Üniversite</option>
-              <option value="Mezun">Mezun</option>
-            </Select>
-          </FormControl>
+                    <FormControl id="profile-photo">
+                        <FormLabel>Profil Fotoğrafı</FormLabel>
+                        <Stack direction="row" spacing={4} align="center">
+                            <Avatar>
+                              
+                            </Avatar>
+                            <Button as="label">
+                                Yükle <Input type="file" hidden accept="image/*" />
+                            </Button>
+                        </Stack>
+                    </FormControl>
 
+<<<<<<< HEAD
           <FormControl id="gender">
             <FormLabel>Cinsiyet</FormLabel>
             <Select
@@ -221,5 +202,15 @@ const ProfileEdit = () => {
     </Flex>
   );
 };
+=======
+                    <Button type="submit" colorScheme="blue" size="lg">
+                        Profili Güncelle
+                    </Button>
+                </Stack>
+            </Box>
+        </Flex>
+    );
+}
+>>>>>>> ec45447b99e1bc47bc9383d7d8e5ce43e354653b
 
 export default ProfileEdit;

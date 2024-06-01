@@ -51,8 +51,7 @@ const ProfilePast = ({ name }) => {
     };
   
     fetchUserData();
-  }, []);
-
+  }, [name]);
   useEffect(() => {
     const fetchTokenUserData = async () => {
       try {
@@ -75,7 +74,8 @@ const ProfilePast = ({ name }) => {
     };
   
     fetchTokenUserData();
-  },[]); // Token bağımlılığı eklendi
+  }, [name]);
+  
  
   useEffect(() => {
     if (kullaniciidReady && useridReady) {
@@ -87,6 +87,7 @@ const ProfilePast = ({ name }) => {
     }
   }, [kullaniciidReady, useridReady]);
 
+  console.log(kullanici)  
   useEffect(() => {
     const fetchSoruData = async () => {
       try { 
