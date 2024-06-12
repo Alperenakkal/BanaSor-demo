@@ -7,48 +7,50 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const generateTokenAndSetCookie = require('../utils/generateTokenAndSetCookie.js');
 const cloudinary = require('cloudinary').v2;
-
+const fs =require('fs');
 const storage = multer.memoryStorage(); // Dosyaları bellek üzerinde tutmak için
 const upload = multer({ storage: storage });
 // Login fonksiyonu
+
+
 const login = async (req, res) => {
     try {
-        const { userName, password } = req.body;
-
-        console.log('Login attempt:', { userName, password }); // Gelen verileri loglayın
-
-        if (!userName || !password) {
-            return res.status(400).json({ error: "Username and password are required" });
-        }
-
-        const user = await User.findOne({ userName });
-        console.log('User found:', user); // Bulunan kullanıcıyı loglayın
-
-        if (!user) {
-            return res.status(400).json({ error: "Invalid username or password" });
-        }
-
-        const isPasswordCorrect = await bcrypt.compare(password, user.password);
-        console.log('Password match:', isPasswordCorrect); // Şifre doğrulama sonucunu loglayın
-
-        if (!isPasswordCorrect) {
-            return res.status(400).json({ error: "Invalid username or password" });
-        }
-
-        const token = generateTokenAndSetCookie(user._id, res);
-
-        res.status(200).json({
-            _id: user._id,
-            fullName: user.fullName,
-            userName: user.userName,
-            profilePic: user.profilePic,
-            token // Token'ı yanıtla birlikte gönderiyoruz
-        });
+      const { userName, password } = req.body;
+  
+      if (!userName || !password) {
+        return res.status(400).json({ error: "Username and password are required" });
+      }
+  
+      const user = await User.findOne({ userName });
+      console.log('User found:', user); // Bulunan kullanıcıyı loglayın
+  
+      if (!user) {
+        return res.status(400).json({ error: "Invalid username or password" });
+      }
+  
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      console.log('Password match:', isPasswordCorrect); // Şifre doğrulama sonucunu loglayın
+  
+      if (!isPasswordCorrect) {
+        return res.status(400).json({ error: "Invalid username or password" });
+      }
+  
+     
+      const token = generateTokenAndSetCookie(user._id, res);
+  
+      res.status(200).json({
+        _id: user._id,
+        fullName: user.fullName,
+        userName: user.userName,
+        profilePic: user.profilePic,
+        token // Token'ı yanıtla birlikte gönderiyoruz
+      });
     } catch (error) {
-        console.log("Error in login controller", error.message);
-        res.status(500).json({ error: "Internal Server Error" });
+      console.log("Error in login controller", error.message);
+      res.status(500).json({ error: "Internal Server Error" });
     }
-};
+  };
+  
 
 
 // Logout fonksiyonu
@@ -77,12 +79,12 @@ const getUser = async (req, res) => {
 const getUserJwt = async(req,res)=>{
 try {
         const id = req.user._id;
-        console.log("Received ID:", id); // ID'yi loglayın
+      
 
       
 
         const user = await User.findById(id);
-        console.log("User found:", user); // Bulunan kullanıcıyı loglayın
+       
 
         if (!user) {
             return res.status(404).json({ error: "Giris Yapılmamis" });
@@ -98,7 +100,7 @@ try {
 const getUserId = async (req, res) => {
     try {
         const id = req.params.id;
-        console.log("Received ID:", id); // ID'yi loglayın
+     
 
         // ID'nin geçerli bir MongoDB ObjectId olup olmadığını kontrol edin
         if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -106,7 +108,7 @@ const getUserId = async (req, res) => {
         }
 
         const user = await User.findById(id);
-        console.log("User found:", user); // Bulunan kullanıcıyı loglayın
+    
 
         if (!user) {
             return res.status(404).json({ error: "User not found" });
@@ -141,6 +143,7 @@ const signup = async (req, res) => {
                 folder: 'profile_pics'
             });
             profilePicUrl = result.secure_url;
+           
         } else {
             profilePicUrl = gender === 'male' 
                 ? `https://avatar.iran.liara.run/public/boy?username=${userName}`
@@ -169,6 +172,7 @@ const signup = async (req, res) => {
                 profilePic: newUser.profilePic,
                 seviye:newUser.seviye
             });
+            fs.unlinkSync(profilePicUrl);
         } else {
             res.status(400).json({ error: "Invalid user data" });
         }
@@ -182,56 +186,67 @@ const signup = async (req, res) => {
 
 const updateUser = async function (req, res) {
     try {
-        // Form verilerini al
-        let { fullName, userName, email, password, gender, seviye } = req.body;
-
-        // Kullanıcı adını al ve filtreleme objesini oluştur
-        let username = req.params.userName;
-        let filter = { userName: username };
-
-        // Kullanıcıyı veritabanından bul
-        let user = await User.findOne(filter);
-        if (!user) {
-            return res.status(400).json({ error: "Kullanıcı bulunamadı" });
+      // Form verilerini al
+      let { fullName, userName, email, password, gender, seviye } = req.body;
+  
+      // Kullanıcı adını al ve filtreleme objesini oluştur
+      let username = req.params.userName;
+      let filter = { userName: username };
+  
+      // Kullanıcıyı veritabanından bul
+      let user = await User.findOne(filter);
+      if (!user) {
+        return res.status(400).json({ error: "Kullanıcı bulunamadı" });
+      }
+  
+      // Eğer yeni şifre verilmişse, şifreyi hash'le
+      if (password) {
+        let salt = await bcrypt.genSalt(10);
+        let hashedPassword = await bcrypt.hash(password, salt);
+        user.password = hashedPassword;
+      }
+  
+      // Kullanıcı bilgilerini güncelle
+      user.fullName = fullName || user.fullName;
+      user.userName = userName || user.userName;
+      user.email = email || user.email;
+      user.gender = gender || user.gender;
+      user.seviye = seviye || user.seviye; // Seviye değerini güncelle
+  
+      // Profil resmi URL'sini belirle
+      let profilePicUrl = '';
+      if (req.file) {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'profile_pics'
+        });
+        profilePicUrl = result.secure_url;
+  
+        // Remove the previous profile picture from Cloudinary if it exists
+        if (user.profilePic && user.profilePic.startsWith('http')) {
+          const publicId = user.profilePic.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`profile_pics/${publicId}`);
         }
-
-        // Eğer yeni şifre verilmişse, şifreyi hash'le
-        if (password) {
-            let salt = await bcrypt.genSalt(10);
-            let hashedPassword = await bcrypt.hash(password, salt);
-            user.password = hashedPassword;
-        }
-
-        // Kullanıcı bilgilerini güncelle
-        user.fullName = fullName || user.fullName;
-        user.userName = userName || user.userName;
-        user.email = email || user.email;
-        user.gender = gender || user.gender;
-        user.seviye = seviye || user.seviye; // Seviye değerini güncelle
-
-        // Profil resmi URL'sini belirle
-        let profilePicUrl = '';
-        if (req.file) {
-            const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: 'profile_pics'
-            });
-            profilePicUrl = result.secure_url;
-        } else {
-            profilePicUrl = gender === 'male' 
-                ? `https://avatar.iran.liara.run/public/boy?username=${userName}`
-                : `https://avatar.iran.liara.run/public/girl?username=${userName}`;
-        }
-
-        // Kullanıcıyı kaydet
-        user = await user.save();
-
-        // Güncellenmiş kullanıcı bilgilerini JSON formatında döndür
-        return res.status(200).json(user);
+      } else {
+        profilePicUrl = gender === 'male'
+          ? `https://avatar.iran.liara.run/public/boy?username=${userName}`
+          : `https://avatar.iran.liara.run/public/girl?username=${userName}`;
+      }
+  
+      // Profil resmini güncelle
+      user.profilePic = profilePicUrl;
+  
+      // Kullanıcıyı kaydet
+      user = await user.save();
+  
+      // Güncellenmiş kullanıcı bilgilerini JSON formatında döndür
+      return res.status(200).json(user);
+  
     } catch (error) {
-        res.status(400).json({ error: "Güncelleme başarısız" });
-        console.error(error.message);
+      console.error("Güncelleme hatası:", error.message);
+      return res.status(400).json({ error: "Güncelleme başarısız" });
     }
-};
+  };
+  
 const followUnFollowUser = async (req, res) => {
     try {
         const username = req.params.userName;
@@ -292,5 +307,7 @@ const getTopUsers = async (req, res) => {
 
 
 
+
 module.exports = { login, logout, signup ,updateUser,getUser,getUserId,getUserJwt,getTopUsers, followUnFollowUser};
+
 

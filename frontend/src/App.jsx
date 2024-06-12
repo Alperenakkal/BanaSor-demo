@@ -22,7 +22,9 @@ import Profile from './pages/Profile'
 import ProfileEdit from './pages/ProfileEdit'
 import SoruGüncelle from './components/SoruGüncelle'
 import CevapGuncelle from './components/CevapGuncelle'
-import Login from './pages/login'
+import GirisYap from './components/GirisYap'
+import SingUp from './pages/SingUp'
+
 
 
 
@@ -47,10 +49,10 @@ function App() {
       <Route path='/sorusorsayfasi' element={<SoruSorSayfasi/>}/>
       <Route path='/sorugüncelle/:soruid' element={<SoruGüncelle/>}/>
       <Route path='/cevapguncelle/:soruid' element={<CevapGuncelle/>}/>
-      <Route path="/login" element={<Login />} />
-
+      <Route path="/login" element={<GirisYap />} />
+      <Route path='/singup' element={<SingUp/>}/>
       <Route path='/profile/:name'  element={<Profile/>}/>
-      <Route path='/profileedit' element={<ProfileEdit/>} />
+      <Route path='/profileedit/:userName' element={<ProfileEdit/>} />
 
 
 

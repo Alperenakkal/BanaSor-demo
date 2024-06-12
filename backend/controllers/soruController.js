@@ -4,6 +4,7 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const storage = multer.memoryStorage(); // Dosyaları bellek üzerinde tutmak için
 const upload = multer({ storage: storage });
+const fs =require('fs');
 
 const getSoruByDers = async (req,res) =>{
     try {
@@ -78,6 +79,7 @@ const getUserSoru = async (req, res) => {
 
       const savedSoru = await newSoru.save();
       res.status(201).json(savedSoru);
+      fs.unlinkSync(soruPicUrl);
 
     } catch (error) {
       res.status(500).json({ message:"bağlanamadı" });
