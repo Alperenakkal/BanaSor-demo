@@ -15,23 +15,21 @@ import {
 } from '@chakra-ui/react';
 
 function GirisYap() {
-  const[username, setUserName]= useState(' ');
+  const [username, setUserName] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userName: username, password }),
+      const response = await axios.post('http://localhost:3000/kullanici/login', {
+        userName: username,
+        password: password,
       });
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Login successful:', data);
-        // Giriş başarılıysa istenen işlemleri gerçekleştirin (örneğin, kullanıcıyı yönlendirin)
+      if (response.status === 200) {
+        console.log('Login successful:', response.data);
+        // Giriş başarılıysa token'ı yerel depolamaya kaydet
+        localStorage.setItem('jwt', response.data.token);
+        // Kullanıcıyı yönlendirin veya başka işlemler yapın
       } else {
         console.error('Login failed:', response.statusText);
         // Giriş başarısızsa hata mesajını kullanıcıya gösterin
@@ -43,7 +41,6 @@ function GirisYap() {
   };
 
   return (
-  
     <Flex minH={'100vh'} align={'center'} justify={'center'}>
       <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
         <Stack align={'center'}>
@@ -60,11 +57,11 @@ function GirisYap() {
           <Stack spacing={4}>
             <FormControl id="userName">
               <FormLabel>Kullanıcı adı</FormLabel>
-              <Input type="userName" />
+              <Input type="text" value={username} onChange={(e) => setUserName(e.target.value)} />
             </FormControl>
             <FormControl id="password">
               <FormLabel>Şifre</FormLabel>
-              <Input type="password" />
+              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </FormControl>
             <Stack spacing={6}>
               <Stack
@@ -74,7 +71,7 @@ function GirisYap() {
                 <Checkbox>Beni hatırla</Checkbox>
                 <Text color={'blue.500'}>Şifremi Unuttum?</Text>
               </Stack>
-              <Button colorScheme={'blue'} variant={'solid'}>
+              <Button colorScheme={'blue'} variant={'solid'} onClick={handleSubmit}>
                 Giriş Yap
               </Button>
             </Stack>

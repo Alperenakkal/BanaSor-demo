@@ -52,7 +52,7 @@ function App() {
       <Route path="/login" element={<GirisYap />} />
       <Route path='/singup' element={<SingUp/>}/>
       <Route path='/profile/:name'  element={<Profile/>}/>
-      <Route path='/profileedit' element={<ProfileEdit/>} />
+      <Route path='/profileedit/:userName' element={<ProfileEdit/>} />
 
 
 

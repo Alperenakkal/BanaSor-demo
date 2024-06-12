@@ -1,4 +1,22 @@
-import { Avatar, Box, Button, Flex, Spinner, Text, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Stack, useDisclosure } from '@chakra-ui/react';
+import {
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  Spinner,
+  Text,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+  FormControl,
+  FormLabel,
+  Stack,
+  useDisclosure
+} from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { FaPencilAlt, FaGraduationCap, FaCalendarAlt, FaUserPlus } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +26,7 @@ import { tr } from 'date-fns/locale';
 
 const ProfileName = ({ name }) => {
   const [isFollowing, setIsFollowing] = useState(false);
-  const [followerCount, setFollowerCount] = useState(0);
+  const [follower, setFollower] = useState(false);
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [kullanici, setKullanici] = useState(false);
@@ -17,27 +35,16 @@ const ProfileName = ({ name }) => {
   const [userTokenData, setUserTokenData] = useState(null);
   const [kullaniciidReady, setKullaniciIdReady] = useState(false);
   const [useridReady, setUserIdReady] = useState(false);
-  const [follower,setFollower] =useState(false)
   const [followStatus, setFollowStatus] = useState(false);
   const [fallowData, setFallowData] = useState(null);
   const [fallowId, setFallowId] = useState(null);
-
   const navigate = useNavigate();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedOptions, setSelectedOptions] = useState([]);
 
-  const handleClick = () => {
-    navigate("/profileedit");
-  }
-
-  const handleFollowClick = () => {
-    setIsFollowing(!isFollowing);
-    setFollowerCount(isFollowing ? followerCount - 1 : followerCount + 1);
+  const handleClick = (userName) => {
+    navigate(`/profileedit/${userName}`);
   };
-
-
-
-  
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -46,13 +53,8 @@ const ProfileName = ({ name }) => {
         setUserData(response.data);
         if (response.data && response.data._id) {
           setUserId(response.data._id);
-
           setFallowId(response.data.followers);
           setUserIdReady(true);
-
-          setUserIdReady(true);
-          setLoading(false);
-
         }
       } catch (error) {
         console.error('Kullanıcı verilerini alma hatası:', error);
@@ -60,10 +62,8 @@ const ProfileName = ({ name }) => {
         setLoading(false);
       }
     };
-
     fetchUserData();
   }, [name]);
-
 
   useEffect(() => {
     const fetchTokenUserData = async () => {
@@ -85,35 +85,37 @@ const ProfileName = ({ name }) => {
         setLoading(false);
       }
     };
-
     fetchTokenUserData();
-  }, []); 
+  }, []);
 
   const fetchFollowingData = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('jwt');
-      await axios.post(`http://localhost:3000/kullanici/follow/${name}`, {}, {
+      const response = await axios.post(`http://localhost:3000/kullanici/follow/${name}`, {}, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
+      setUserData(response.data);
       setFollowStatus(!followStatus);
     } catch (error) {
       console.error('Takip işlemi hatası:', error);
+      setFollowStatus(false);
     } finally {
       setLoading(false);
       window.location.reload();
     }
   };
 
-
+  const handleFollowClick = () => {
+    fetchFollowingData();
+  };
 
   useEffect(() => {
     if (kullaniciidReady && useridReady) {
       setKullanici(kullaniciid === userid);
     }
-
   }, [kullaniciidReady, useridReady, kullaniciid, userid]);
 
   useEffect(() => {
@@ -121,7 +123,6 @@ const ProfileName = ({ name }) => {
       setFollower(userData?.followers?.includes(kullaniciid));
     }
   }, [kullaniciidReady, useridReady, userData, kullaniciid]);
-
 
   if (loading) {
     return <Spinner />;
@@ -143,7 +144,6 @@ const ProfileName = ({ name }) => {
   };
 
   const handleSubmit = () => {
-    // Şikayet gönderme işlemi burada yapılabilir
     console.log('Selected Options:', selectedOptions);
     onClose();
   };
@@ -170,19 +170,9 @@ const ProfileName = ({ name }) => {
           </Flex>
         </Flex>
         <Flex mt="30px" direction="row" align="center" justify="space-between" borderRadius="10px" p="20px" bg="#EEEEEE">
-          <Flex
-            alignItems="center"
-            justifyContent="flex-start"
-            pl="30px"
-            bg="#58A399"
-            w="30%"
-            fontWeight="bold"
-            height="50px"
-            borderRadius="10px"
-          >
+          <Flex alignItems="center" justifyContent="flex-start" pl="20px" bg="#58A399" w="30%" fontWeight="bold" height="50px" borderRadius="10px">
             Çirak
           </Flex>
-
           <Flex direction="column">
             {!kullanici && (
               <Button
@@ -205,85 +195,80 @@ const ProfileName = ({ name }) => {
               </Flex>
             </Box>
           </Flex>
-
         </Flex>
-      </Flex>
-      {kullanici ? (
-        <Flex alignItems="flex-start" mt="30px">
-
+        {kullanici ? (
+          <Flex alignItems="flex-start" mt="30px">
+            <Button
+              width="300px"
+              borderRadius="30px"
+              fontWeight="bold"
+              gap={2}
+              onClick={() => handleClick(userData.userName)}
+            >
+              <FaPencilAlt />
+              Profili Düzenle
+            </Button>
+          </Flex>
+        ) : (
           <Button
             width="300px"
             borderRadius="30px"
             fontWeight="bold"
-            gap={2}
-            onClick={() => handleClick(userData.userName)}
+            bg="red.500"
+            color="white"
+            _hover={{ bg: "red.600" }}
+            _active={{ bg: "red.700" }}
+            onClick={onOpen}
           >
-
-            <FaPencilAlt />
-            Profili Düzenle
+            Şikayet Et
           </Button>
-        </Flex>
-      ) : (
-        <Button
-          width="300px"
-          borderRadius="30px"
-          fontWeight="bold"
-          bg="red.500"
-          color="white"
-          _hover={{ bg: "red.600" }}
-          _active={{ bg: "red.700" }}
-          onClick={onOpen}
-        >
-          Şikayet Et
-        </Button>
-      )}
-      <Modal isOpen={isOpen} onClose={onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Şikayet Et</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <FormControl as="fieldset">
-              <FormLabel as="legend">Şikayet Nedeni</FormLabel>
-              <Stack direction="column">
-                {["Müstehcen", "Küfür", "YanilticiBilgi", "Tehdit"].map((option) => (
-                  <Button
-                    key={option}
-                    onClick={() => handleOptionChange(option)}
-                    bg={selectedOptions.includes(option) ? "gray.300" : ""}
-                    _hover={{ bg: "gray.200" }}
-                    _active={{ bg: "gray.400" }}
-                  >
-                    {option}
-                  </Button>
-                ))}
-              </Stack>
-            </FormControl>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
-              Gönder
-            </Button>
-            <Button variant="ghost" onClick={onClose}>
-              İptal
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-      <Flex alignItems="flex-start" w="100%" mt="30px" direction="column">
-        <Text fontWeight="bold">Hakkında</Text>
-        <Box height="5px" width="100%" bg="gray.200" mt="4px" />
-        <Flex mt="20px" gap={3}>
-          <FaGraduationCap fontSize="25px" />
-          <Text fontWeight="light">Seviye:</Text>
-          <Text fontWeight="bold">{userData.seviye}</Text>
-        </Flex>
-        <Flex mt="20px" gap={3}>
-
-          <FaCalendarAlt fontSize="25px" />
-          <Text fontWeight="light">Katılma Tarihi:</Text>
-          <Text fontWeight="bold">{formatDate(userData.createdAt)}</Text>
-
+        )}
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Şikayet Et</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <FormControl as="fieldset">
+                <FormLabel as="legend">Şikayet Nedeni</FormLabel>
+                <Stack direction="column">
+                  {["Müstehcen", "Küfür", "YanilticiBilgi", "Tehdit"].map((option) => (
+                    <Button
+                      key={option}
+                      onClick={() => handleOptionChange(option)}
+                      bg={selectedOptions.includes(option) ? "gray.300" : ""}
+                      _hover={{ bg: "gray.200" }}
+                      _active={{ bg: "gray.400" }}
+                    >
+                      {option}
+                    </Button>
+                  ))}
+                </Stack>
+              </FormControl>
+            </ModalBody>
+            <ModalFooter>
+              <Button colorScheme="blue" mr={3} onClick={handleSubmit}>
+                Gönder
+              </Button>
+              <Button variant="ghost" onClick={onClose}>
+                İptal
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+        <Flex alignItems="flex-start" w="100%" mt="30px" direction="column">
+          <Text fontWeight="bold">Hakkında</Text>
+          <Box height="5px" width="100%" bg="gray.200" mt="4px" />
+          <Flex mt="20px" gap={3}>
+            <FaGraduationCap fontSize="25px" />
+            <Text fontWeight="light">Seviye:</Text>
+            <Text fontWeight="bold">{userData.seviye}</Text>
+          </Flex>
+          <Flex mt="20px" gap={3}>
+            <FaCalendarAlt fontSize="25px" />
+            <Text fontWeight="light">Katılma Tarihi:</Text>
+            <Text fontWeight="bold">{formatDate(userData.createdAt)}</Text>
+          </Flex>
         </Flex>
       </Flex>
     </Flex>
