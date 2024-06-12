@@ -190,4 +190,4 @@ const addRating = async (req, res) => {
   
 
 
-module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru,searchSorular,getSoruById,addRating};
+module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru,searchSorular,getSoruById ,addRating};

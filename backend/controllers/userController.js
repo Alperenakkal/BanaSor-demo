@@ -288,9 +288,9 @@ const getTopUsers = async (req, res) => {
 };
 
 
-module.exports = followUnFollowUser;
 
 
 
-module.exports = { login, logout, signup ,updateUser,getUser,getUserId,getUserJwt,getTopUsers};
+
+module.exports = { login, logout, signup ,updateUser,getUser,getUserId,getUserJwt,getTopUsers, followUnFollowUser};
 
