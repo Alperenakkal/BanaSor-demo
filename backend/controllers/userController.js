@@ -10,6 +10,7 @@ const cloudinary = require('cloudinary').v2;
 
 const storage = multer.memoryStorage(); // Dosyaları bellek üzerinde tutmak için
 const upload = multer({ storage: storage });
+
 // Login fonksiyonu
 const login = async (req, res) => {
     try {
@@ -50,7 +51,6 @@ const login = async (req, res) => {
     }
 };
 
-
 // Logout fonksiyonu
 const logout = (req, res) => {
     try {
@@ -61,6 +61,7 @@ const logout = (req, res) => {
         res.status(500).json({ error: "Internal Server error" });
     }
 };
+
 const getUser = async (req, res) => {
     try {
         const userName = req.params.userName;
@@ -74,12 +75,11 @@ const getUser = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 };
-const getUserJwt = async(req,res)=>{
-try {
+
+const getUserJwt = async (req, res) => {
+    try {
         const id = req.user._id;
         console.log("Received ID:", id); // ID'yi loglayın
-
-      
 
         const user = await User.findById(id);
         console.log("User found:", user); // Bulunan kullanıcıyı loglayın
@@ -94,6 +94,7 @@ try {
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
 // Kullanıcı ID'si ile kullanıcıyı getiren fonksiyon
 const getUserId = async (req, res) => {
     try {
@@ -122,7 +123,7 @@ const getUserId = async (req, res) => {
 // Signup fonksiyonu
 const signup = async (req, res) => {
     try {
-        const { fullName, userName, email, password, confirmPassword, gender ,seviye} = req.body;
+        const { fullName, userName, email, password, confirmPassword, gender, seviye } = req.body;
         if (password !== confirmPassword) {
             return res.status(400).json({ error: "Passwords don't match" });
         }
@@ -142,7 +143,7 @@ const signup = async (req, res) => {
             });
             profilePicUrl = result.secure_url;
         } else {
-            profilePicUrl = gender === 'male' 
+            profilePicUrl = gender === 'male'
                 ? `https://avatar.iran.liara.run/public/boy?username=${userName}`
                 : `https://avatar.iran.liara.run/public/girl?username=${userName}`;
         }
@@ -167,7 +168,7 @@ const signup = async (req, res) => {
                 userName: newUser.userName,
                 email: newUser.email,
                 profilePic: newUser.profilePic,
-                seviye:newUser.seviye
+                seviye: newUser.seviye
             });
         } else {
             res.status(400).json({ error: "Invalid user data" });
@@ -177,8 +178,6 @@ const signup = async (req, res) => {
         res.status(500).json({ error: "Internal Server error" });
     }
 };
-
-
 
 const updateUser = async function (req, res) {
     try {
@@ -217,7 +216,7 @@ const updateUser = async function (req, res) {
             });
             profilePicUrl = result.secure_url;
         } else {
-            profilePicUrl = gender === 'male' 
+            profilePicUrl = gender === 'male'
                 ? `https://avatar.iran.liara.run/public/boy?username=${userName}`
                 : `https://avatar.iran.liara.run/public/girl?username=${userName}`;
         }
@@ -232,6 +231,7 @@ const updateUser = async function (req, res) {
         console.error(error.message);
     }
 };
+
 const followUnFollowUser = async (req, res) => {
     try {
         const username = req.params.userName;
@@ -271,8 +271,6 @@ const followUnFollowUser = async (req, res) => {
         console.log("Error in followUnFollowUser:", error.message);
     }
 };
-
-module.exports = followUnFollowUser;
 
 // Yorum ekleme fonksiyonu
 const yorumEkle = async (req, res) => {
@@ -322,7 +320,4 @@ const yorumSil = async (req, res) => {
     }
 };
 
-
-
-module.exports = { login, logout, signup ,updateUser,getUser,getUserId,followUnFollowUser,getUserJwt,yorumEkle,yorumSil};
-
+module.exports = { login, logout, signup, updateUser, getUser, getUserId, followUnFollowUser, getUserJwt, yorumEkle, yorumSil };
