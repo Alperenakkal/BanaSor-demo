@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { TimeCal } from './TimeCal';
 import { FaPencilAlt, FaRegStar } from "react-icons/fa";
 import YorumYapma from "./YorumYapma";
+import axios from "axios";
 
 const SoruDetay = () => {
     const [soru, setSoru] = useState(null);
@@ -14,28 +15,35 @@ const SoruDetay = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [tempRating, setTempRating] = useState(0);
     const [selectedSoruIndex, setSelectedSoruIndex] = useState(null);
-    const [likeCount, setLikeCount] = useState(0); // State for like count
+    const [likeCount, setLikeCount] = useState(0); // Like sayısı için state
     const navigate = useNavigate();
     const { soruid } = useParams();
 
-  // Geçen zamanın gün, saat, dakika veya saniye cinsine dönüştürülmesi
-  const timeDifferenceInSeconds = Math.floor(timeDifferenceInMilliseconds / 1000);
-  const timeDifferenceInMinutes = Math.floor(timeDifferenceInMilliseconds / (1000 * 60));
-  const timeDifferenceInHours = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60));
-  const timeDifferenceInDays = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+    useEffect(() => {
+        axios.get(`/api/sorular/${soruid}`)
+            .then(response => {
+                setSoru(response.data);
+            })
+            .catch(error => {
+                console.error("Kullanıcı verilerini alma hatası:", error);
+            });
+    }, [soruid]);
+
+    if (!soru) return <div>Yüklüyor...</div>;
+
+    const zamanFarki = TimeCal(soru.soruSorulmaSuresi);
 
     const handleClick = (konu) => {
         navigate(`/konu/${konu}`);
     };
 
     const handleClick3 = (soruid) => {
-        navigate(`/sorugüncelle/${soruid}`);
+        navigate(`/soruguncelle/${soruid}`);
     };
 
     const handleClick2 = (name) => {
-        navigate(`/profile/${name}`)
-    }
-
+        navigate(`/profile/${name}`);
+    };
 
     const handleOpenModal = () => {
         setTempRating(soru.selectedRating);
@@ -53,6 +61,7 @@ const SoruDetay = () => {
     const handleYorumSil = (index) => {
         setYorumlar(yorumlar.filter((_, i) => i !== index));
     };
+
     const handleStarClick = (starIndex) => {
         setTempRating(starIndex + 1);
     };
@@ -66,28 +75,25 @@ const SoruDetay = () => {
     };
 
     const handleLikeClick = () => {
-        setLikeCount(likeCount + 1); // Increase like count by 1
+        setLikeCount(likeCount + 1); // Like sayısını 1 artır
     };
-
-    if (!soru) return <div>Yüklüyor...</div>;
-
-    const zamanFarki = TimeCal(soru.soruSorulmaSuresi);
 
     return (
         <Flex flexDirection="row">
             <Flex flexDirection="column">
                 <Flex p="5px" w="100%">
-                    <Flex minWidth={"608px"} maxWidth="608px" height="auto" px={4}>
-                        <Card overflow='hidden' variant='outline' sx={{ minWidth: '608px', maxWidth: '608px', minHeight: '200px' }}>
-                            <Flex pl={"20px"} pt={"15px"} alignItems="center" justifyContent="space-between">
-                                <Flex alignItems="center">
+                    <Flex minWidth={"608px"} maxW="608px" height="auto" px={4}>
+                        <Card overflow='hidden' variant='outline' sx={{ minWidth: '608px', maxW: '608px', minHeight: '200px' }}>
+                            <Flex pl={"20px"} pt={"15px"} align="center" justify="space-between">
+                                <Flex align="center">
                                     <Avatar size={"sm"} src={soru.avatar} name={`${soru.isim} ${soru.soyisim}`} />
-                                    <Flex alignItems="center" ml={2}>
+                                    <Flex align="center" ml={2}>
                                         <Button
                                             bg="transparent"
                                             _hover={{ bg: "transparent", textDecoration: "underline" }}
-                                            alignItems="center"
+                                            align="center"
                                             fontWeight="bold" fontFamily="heading"
+                                            onClick={() => handleClick2(soru.isim)}
                                         >
                                             {soru.isim} {soru.soyisim}
                                         </Button>
@@ -95,7 +101,7 @@ const SoruDetay = () => {
                                         <Button
                                             bg="transparent"
                                             _hover={{ bg: "transparent", textDecoration: "underline" }}
-                                            alignItems="center"
+                                            align="center"
                                             fontFamily="heading"
                                             fontSize="xs"
                                             onClick={() => handleClick(soru.dersIsim)}
@@ -112,10 +118,10 @@ const SoruDetay = () => {
                                     <Button size="m" marginRight="10px" onClick={() => handleClick3(soru.globalId)}>
                                         <FaPencilAlt />
                                     </Button>
-                                    <Button size="m" onClick={handleLikeClick}> {/* Like button */}
+                                    <Button size="m" onClick={handleLikeClick}> {/* Like butonu */}
                                         <Image boxSize={"18px"} src='/like.svg' />
                                     </Button>
-                                    <Text ml={1}>{likeCount}</Text> {/* Display like count */}
+                                    <Text ml={1}>{likeCount}</Text> {/* Like sayısını göster */}
                                 </Flex>
                                 <Modal isOpen={isOpen} onClose={handleCloseModal}>
                                     <ModalOverlay />
@@ -127,8 +133,7 @@ const SoruDetay = () => {
                                                 {[...Array(5)].map((_, starIndex) => (
                                                     <FaRegStar
                                                         key={starIndex}
-                                                        onClick={() => handleStarClick
-                                                            (starIndex)}
+                                                        onClick={() => handleStarClick(starIndex)}
                                                         color={starIndex < tempRating ? 'yellow' : 'gray.300'}
                                                         style={{ cursor: 'pointer' }}
                                                     />
@@ -155,7 +160,7 @@ const SoruDetay = () => {
                                 <Button variant='outline'>
                                     <Image boxSize={"18px"} src='/like.svg' />
                                 </Button>
-                                <Text>{likeCount}</Text> {/* Display like count */}
+                                <Text>{likeCount}</Text> {/* Like sayısını göster */}
                                 <Button marginLeft={"auto"} colorScheme='teal' variant='outline'>
                                     Cevapları Gör
                                 </Button>
@@ -164,8 +169,8 @@ const SoruDetay = () => {
                     </Flex>
                 </Flex>
                 <Flex mt={4}>
-                    <Flex minWidth={"608px"} maxWidth="608px" height="auto" px={4}>
-                        <Card overflow='hidden' variant='outline' sx={{ minWidth: '608px', maxWidth: '608px', minHeight: '200px' }}>
+                    <Flex minWidth={"608px"} maxW="608px" height="auto" px={4}>
+                        <Card overflow='hidden' variant='outline' sx={{ minWidth: '608px', maxW: '608px', minHeight: '200px' }}>
                             <CardBody>
                                 <YorumYapma onYorumSubmit={handleYorumSubmit} />
                                 {yorumlar.map((yorum, index) => (
