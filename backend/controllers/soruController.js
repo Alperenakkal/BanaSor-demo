@@ -18,18 +18,32 @@ const getSoruByDers = async (req,res) =>{
     console.log("Error in getSoruByDers controller:", error.message);
     res.status(500).json({ error: "Internal server error" });
 }}
-const getSoruById = async (req,res) =>{
+
+const getSoruById = async (req, res) => {
   try {
-  const soruid = req.params.soruid;
-  const soru = await Soru.findById(soruid)
-  if (!soru) {
-      return res.status(400).json({ error: "soru bulunamadi" });
+    const soruId = req.params.soruId; 
+    console.log("Request to get Soru by ID:", soruId); // Loglama ekledik// URL parametresinden soruId'yi al
+
+    // Veritabanından soruyu bul
+    const soru = await Soru.findById(soruId);
+
+    // Eğer soru bulunamazsa hata döndür
+    if (!soru) {
+      return res.status(404).json({ error: "Soru bulunamadı" });
+    }
+
+    // Soruyu bulduysak, istemciye JSON formatında gönder
+    res.status(200).json(soru);
+  } catch (error) {
+    console.error("Error in getSoruById controller:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
-  res.status(200).json(soru);
-} catch (error) {
-  console.log("Error in getSoruByDers controller:", error.message);
-  res.status(500).json({ error: "Internal server error" });
-}}
+};
+
+module.exports = {
+  getSoruById
+};
+
 const getUserSoru = async (req, res) => {
     try {
       const username = req.params.userName;
