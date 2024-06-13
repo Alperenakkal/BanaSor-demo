@@ -14,20 +14,10 @@ import {
   MenuList,
   MenuItem,
   useToast,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
 } from "@chakra-ui/react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaPencilAlt, FaTrash, FaRegStar } from "react-icons/fa";
+import { FaPencilAlt, FaTrash } from "react-icons/fa";
 import { AiOutlineEllipsis } from "react-icons/ai";
-
-
-
 import axios from "axios";
 
 const calculateElapsedTime = (isoDate) => {
@@ -53,10 +43,6 @@ const calculateElapsedTime = (isoDate) => {
 
 const SoruDetay = () => {
   const [soru, setSoru] = useState(null);
-  const [yorumlar, setYorumlar] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [tempRating, setTempRating] = useState(0);
-  const [likeCount, setLikeCount] = useState(0); // Like sayısı için state
   const navigate = useNavigate();
   const { soruid } = useParams();
   const toast = useToast();
@@ -104,39 +90,6 @@ const SoruDetay = () => {
     navigate(`/soruguncelle/${soruid}`);
   };
 
-  const handleOpenModal = () => {
-    setTempRating(soru.selectedRating);
-    setIsOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsOpen(false);
-  };
-
-  const handleYorumSubmit = (yeniYorum) => {
-    setYorumlar([...yorumlar, yeniYorum]);
-  };
-
-  const handleYorumSil = (index) => {
-    setYorumlar(yorumlar.filter((_, i) => i !== index));
-  };
-
-  const handleStarClick = (starIndex) => {
-    setTempRating(starIndex + 1);
-  };
-
-  const handleSubmitRating = () => {
-    setSoru(prevSoru => ({
-      ...prevSoru,
-      selectedRating: tempRating,
-    }));
-    handleCloseModal();
-  };
-
-  const handleLikeClick = () => {
-    setLikeCount(likeCount + 1); // Like sayısını 1 artır
-  };
-
   const handleDelete = async (soruid) => {
     try {
       await axios.delete(`http://localhost:3000/soru/soru/${soruid}`);
@@ -164,129 +117,90 @@ const SoruDetay = () => {
 
   return (
     <Flex flexDirection="row">
-  <Flex flexDirection="column">
-    <Flex p="5px" w="100%">
-      <Flex minWidth={"608px"} maxWidth="608px" height="auto" px={4}>
-        <Card
-          overflow="hidden"
-          variant="outline"
-          sx={{ minWidth: "608px", maxWidth: "608px", minHeight: "200px" }}
-        >
-          <Flex pl={"20px"} pt={"15px"} alignItems="center">
-            <Avatar
-              size={"sm"}
-              src={soru.userData.profilePic}
-              name={soru.userData.fullName}
-            />
-            <Flex alignItems="center" ml={2}>
-              <Button
-                bg="transparent"
-                _hover={{ bg: "transparent", textDecoration: "underline" }}
-                alignItems="center"
-                fontWeight="bold"
-                fontFamily="heading"
-                onClick={() => handleClick2(soru.userData.userName)}
-              >
-                {soru.userData.fullName}
-              </Button>
-              <Box w={1} h={1} bg="gray.800" borderRadius="full" ml={2} />
-              <Button
-                bg="transparent"
-                _hover={{ bg: "transparent", textDecoration: "underline" }}
-                alignItems="center"
-                fontFamily="heading"
-                fontSize="xs"
-                onClick={() => handleClick(soru.dersName)}
-              >
-                {soru.dersName}
-              </Button>
-            </Flex>
-            <Text pl={2} fontSize="xs" fontFamily="heading">
-              {calculateElapsedTime(soru.createdAt)}
-            </Text>
-            <Flex>
-              <Button size="m" marginRight="10px" onClick={handleOpenModal}>
-                <FaRegStar />
-              </Button>
-              <Button size="m" marginRight="10px" onClick={() => handleClick3(soru.globalId)}>
-                <FaPencilAlt />
-              </Button>
-              <Button size="m" onClick={handleLikeClick}>
-                <Image boxSize={"18px"} src='/like.svg' />
-              </Button>
-              <Text ml={1}>{likeCount}</Text>
-            </Flex>
-            <Modal isOpen={isOpen} onClose={handleCloseModal}>
-              <ModalOverlay />
-              <ModalContent>
-                <ModalHeader>Puan Ver</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody>
-                  <Flex justifyContent="center">
-                    {[...Array(5)].map((_, starIndex) => (
-                      <FaRegStar
-                        key={starIndex}
-                        onClick={() => handleStarClick(starIndex)}
-                        color={starIndex < tempRating ? 'yellow' : 'gray.300'}
-                        style={{ cursor: 'pointer' }}
-                      />
-                    ))}
-                  </Flex>
-                </ModalBody>
-                <ModalFooter>
-                  <Button colorScheme="blue" mr={3} onClick={handleSubmitRating}>
-                    Onayla
-                  </Button>
-                  <Button variant="ghost" onClick={handleCloseModal}>
-                    Kapat
-                  </Button>
-                </ModalFooter>
-              </ModalContent>
-            </Modal>
-          </Flex>
-          <Menu>
-            <MenuButton
-              as={Button}
-              marginLeft="auto"
-              size="m"
-              marginRight="25px"
+      <Flex flexDirection="column">
+        <Flex p="5px" w="100%">
+          <Flex minWidth={"608px"} maxWidth="608px" height="auto" px={4}>
+            <Card
+              overflow="hidden"
+              variant="outline"
+              sx={{ minWidth: "608px", maxWidth: "608px", minHeight: "200px" }}
             >
-              <AiOutlineEllipsis />
-            </MenuButton>
-            <MenuList>
-              <MenuItem onClick={() => handleClick3(soru.globalId)}>
-                <FaPencilAlt /> Soru Güncelle
-              </MenuItem>
-              <MenuItem onClick={() => handleDelete(soru.globalId)}>
-                <FaTrash /> Soru Sil
-              </MenuItem>
-            </MenuList>
-          </Menu>
-        </Card>
+              <Flex pl={"20px"} pt={"15px"} alignItems="center">
+                <Avatar
+                  size={"sm"}
+                  src={soru.userData.profilePic}
+                  name={soru.userData.fullName}
+                />
+                <Flex alignItems="center" ml={2}>
+                  <Button
+                    bg="transparent"
+                    _hover={{ bg: "transparent", textDecoration: "underline" }}
+                    alignItems="center"
+                    fontWeight="bold"
+                    fontFamily="heading"
+                    onClick={() => handleClick2(soru.userData.userName)}
+                  >
+                    {soru.userData.fullName}
+                  </Button>
+                  <Box w={1} h={1} bg="gray.800" borderRadius="full" ml={2} />
+                  <Button
+                    bg="transparent"
+                    _hover={{ bg: "transparent", textDecoration: "underline" }}
+                    alignItems="center"
+                    fontFamily="heading"
+                    fontSize="xs"
+                    onClick={() => handleClick(soru.dersName)}
+                  >
+                    {soru.dersName}
+                  </Button>
+                </Flex>
+                <Text pl={2} fontSize="xs" fontFamily="heading">
+                  {calculateElapsedTime(soru.createdAt)}
+                </Text>
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    marginLeft="auto"
+                    size="m"
+                    marginRight="25px"
+                  >
+                    <AiOutlineEllipsis />
+                  </MenuButton>
+                  <MenuList>
+                    <MenuItem onClick={() => handleClick3(soru.globalId)}>
+                      <FaPencilAlt /> Soru Güncelle
+                    </MenuItem>
+                    <MenuItem onClick={() => handleDelete(soru.globalId)}>
+                      <FaTrash /> Soru Sil
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              </Flex>
+              <CardBody pl={"50px"} p={2}>
+                <Text
+                  borderRadius="md"
+                  fontFamily={"ProximaNova, Helvetica, Arial, sans-serif"}
+                >
+                  {soru.soru}
+                </Text>
+              </CardBody>
+              <CardFooter pl={"50px"} gap={3} display="flex">
+                <Button variant="outline">
+                  <Image boxSize={"18px"} src="/like.svg" />
+                </Button>
+                <Button
+                  marginLeft={"auto"}
+                  colorScheme="teal"
+                  variant="outline"
+                >
+                  Cevapları Gör
+                </Button>
+              </CardFooter>
+            </Card>
+          </Flex>
+        </Flex>
       </Flex>
-      <CardBody pl={"50px"} p={2}>
-        <Text
-          borderRadius="md"
-          fontFamily={"ProximaNova, Helvetica, Arial, sans-serif"}
-        >
-          {soru.soru}
-        </Text>
-      </CardBody>
-      <CardFooter pl={"50px"} gap={3} display="flex">
-        <Button variant="outline">
-          <Image boxSize={"18px"} src="/like.svg" />
-        </Button>
-        <Button
-          marginLeft={"auto"}
-          colorScheme="teal"
-          variant="outline"
-        >
-          Cevapları Gör
-        </Button>
-      </CardFooter>
     </Flex>
-  </Flex>
-</Flex>
   );
 };
 
