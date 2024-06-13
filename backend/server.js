@@ -38,6 +38,8 @@ app.get('/', (req, res) => {
 
 const kullaniciRoute = require('./routes/kullanici.js');
 const soruRoute = require('./routes/soru');
+
+
 app.use('/kullanici', kullaniciRoute);
 app.use('/soru', soruRoute);
 

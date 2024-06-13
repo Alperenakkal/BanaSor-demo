@@ -152,6 +152,10 @@ const ProfilePast = ({ name }) => {
       return `${timeDifferenceInMinutes} dakika`;
     }
   };
+
+
+
+
   return (
     <Flex direction={"column"}>
       <Flex>
