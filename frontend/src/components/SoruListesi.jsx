@@ -1,6 +1,9 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { TimeCal } from './TimeCal';
+import { FaPencilAlt, FaRegStar } from 'react-icons/fa';
 import {
     Avatar,
-    AvatarGroup,
     Box,
     Button,
     Card,
@@ -9,335 +12,177 @@ import {
     Divider,
     Flex,
     Image,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    Spacer,
     Text,
-  } from "@chakra-ui/react";
-  import React, { useEffect, useState } from "react";
-  import { useSpring, animated } from "react-spring";
-  import { useNavigate } from "react-router-dom";
-  import { TimeCal } from "./TimeCal";
-  import { FaPencilAlt } from "react-icons/fa";
-  import RancedList from "./RancedList";
-  
-  const AnimatedDivider = animated(Divider);
-  
-  const Alperen = () => {
-    const [dersler, setDersler] = useState([]);
-    const [tumDersleriGoster, setTumDersleriGoster] = useState(false);
-    const [sorular, setSorular] = useState([]);
-    const [siniflar, setSiniflar] = useState([]);
-    const [aktifSinif, setAktifSinif] = useState(null);
-  
-    const navigate = useNavigate();
-  
+} from '@chakra-ui/react';
+import axios from 'axios';
+
+const Alperen = () => {
+    const [isOpen, setIsOpen] = useState(false); // Modal açma/kapama state'i
+    const [selectedSoruIndex, setSelectedSoruIndex] = useState(null); // Seçili soru index'i
+    const [dersler, setDersler] = useState([]); // Derslerin tutulacağı state
+    const [tumDersleriGoster, setTumDersleriGoster] = useState(false); // Tüm dersleri gösterme state'i
+    const [sorular, setSorular] = useState([]); // Soruların tutulacağı state
+    const [tempRating, setTempRating] = useState(0); // Geçici olarak seçilen puanın tutulacağı state
+    const navigate = useNavigate(); // React Router ile sayfa yönlendirme fonksiyonu
+
+    // Derslerin API'den alınması için useEffect kullanımı
     useEffect(() => {
-      fetch("/dersler.json")
-        .then((response) => response.json())
-        .then((data) => setDersler(data.dersler));
+        axios.get('/soru/dersler')
+            .then((response) => {
+                setDersler(response.data.dersler);
+            })
+            .catch((error) => console.error('Dersleri alırken hata:', error));
     }, []);
-  
+
+    // Soruların API'den alınması için useEffect kullanımı
     useEffect(() => {
-      fetch("/siniflar.json")
-        .then((response) => response.json())
-        .then((data) => setSiniflar(data.siniflar));
+        axios.get('/soru/sorular')
+            .then((response) => {
+                const filtrelenmisSorular = response.data.sorular.reduce((acc, ders) => {
+                    const sorular = ders.sorular.map((soru) => ({
+                        ...soru,
+                        dersIsim: ders.isim,
+                        zamanFarki: TimeCal(soru.soruSorulmaSuresi),
+                        selectedRating: 0,
+                    }));
+                    return acc.concat(sorular);
+                }, []);
+                setSorular(filtrelenmisSorular);
+            })
+            .catch((error) => console.error('Soruları alırken hata:', error));
     }, []);
-  
-    useEffect(() => {
-      fetch("/sorular.json")
-        .then((response) => response.json())
-        .then((data) => {
-          const filtrelenmisSorular = data.sorular.flatMap((ders) =>
-            ders.sorular.map((soru) => ({
-              ...soru,
-              dersIsim: ders.isim,
-              sinifIsim: ders.sinif,
-              zamanFarki: TimeCal(soru.soruSorulmaSuresi),
-            }))
-          );
-          setSorular(filtrelenmisSorular);
-        });
-    }, []);
-  
-    const handleSinifClick = (sinifId) => {
-      setAktifSinif(sinifId); // Seçilen sınıfı state içinde saklıyoruz
+
+    // Modal'ı açma fonksiyonu ve seçili soru index'ini ayarlama
+    const handleOpenModal = (soruIndex) => {
+        setSelectedSoruIndex(soruIndex);
+        setTempRating(sorular[soruIndex].selectedRating);
+        setIsOpen(true); // Modal'ı aç
     };
-  
+
+    // Modal'ı kapatma fonksiyonu
+    const handleCloseModal = () => {
+        setIsOpen(false); // Modal'ı kapat
+    };
+
+    // Yıldıza tıklama işlemi
+    const handleStarClick = (starIndex) => {
+        setTempRating(starIndex + 1); // Seçilen yıldızın index'i üzerinden tempRating state'ini güncelle
+    };
+
+    // Puanı onaylama ve backend'e gönderme işlemi
+    const handleSubmitRating = () => {
+        if (selectedSoruIndex !== null) {
+            const soruId = sorular[selectedSoruIndex]._id; // Seçili sorunun ID'si
+            const points = tempRating; // Seçilen puan
+
+            const token = localStorage.getItem("jwt");
+            axios.put(`/soru/rate/${soruId}`, {
+                rating: points // API'ye gönderilen puan
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            .then((response) => {
+                // Güncellenen puan ortalaması ve puan sayısını frontend'de güncelle
+                const updatedSorular = [...sorular];
+                updatedSorular[selectedSoruIndex].rating = response.data.averageRating;
+                updatedSorular[selectedSoruIndex].voteCount = response.data.voteCount;
+                setSorular(updatedSorular);
+                
+                // İşlem tamamlandığında modal'ı kapat
+                handleCloseModal();
+            })
+            .catch((error) => {
+                console.error('Puanlama işlemi sırasında hata oluştu:', error);
+                // Hata durumunda kullanıcıya bildirim veya işlem yapılabilir
+            });
+        } else {
+            console.error('Seçili soru indexi null');
+        }
+    };
+
+    // Ders veya soru tıklama işlemleri için yönlendirme fonksiyonları
     const handleClick = (konu) => {
-      console.log("Metne tıklandı!");
-      navigate(`/konu/${konu}`);
+        navigate(`/konu/${konu}`);
     };
-  
-    const handleClick2 = (soruid) => {
-      navigate(`/sorudetay/${soruid}`);
+
+    const handleClick2 = (soruId) => {
+        navigate(`/sorudetay/${soruId}`);
     };
-  
-    const handleClick3 = (soruid) => {
-      navigate(`/soruguncelle/${soruid}`);
+
+    const handleClick3 = (soruId) => {
+        navigate(`/soruguncelle/${soruId}`);
     };
-  
+
+    // Derslerin listelendiği bölüm
     const dersleriGoster = tumDersleriGoster ? dersler : dersler.slice(0, 11);
-    const AnimatedFlex = animated(Flex);
-    const dahaFazlaAnimasyon = useSpring({
-      to: {
-        opacity: 1,
-        height: tumDersleriGoster ? "auto" : "0px",
-        transform: tumDersleriGoster ? "translateY(0%)" : "translateY(-10%)",
-      },
-      from: {
-        opacity: 1,
-        height: "auto",
-        transform: "translateY(-150%)",
-      },
-      config: {
-        duration: 200,
-      },
-    });
-  
-    const filtrelenmisSorular = aktifSinif
-      ? sorular.filter((soru) => soru.sinifId === aktifSinif)
-      : sorular;
+
     return (
-      <Flex direction={"row"} justifyContent="center">
-        <Flex
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          p="5px"
-          w="20%"
-        >
-          <h2>Sınıflar</h2>
-          <AnimatedFlex
-            style={dahaFazlaAnimasyon}
-            wrap="wrap"
-            justify="center"
-            gap={10}
-            maxWidth="200px"
-            mt={"3"}
-            width="100%"
-            alignItems={"center"}
-          >
-            {siniflar.map((sinif) => (
-              <Button
-                key={sinif.id}
-                mt={"10px"}
-                bg={"transparent"}
-                _hover={{ bg: "transparent" }}
-                variant="unstyled"
-                alignItems="center"
-                onClick={() => handleClick(sinif.name)}
-              >
-                <Flex direction="column" alignItems="center" gap={2}>
-                  <Box
-                    fontSize={"12px"}
-                    fontFamily={"ProximaNova, Helvetica, Arial, sans-serif"}
-                    textAlign="center"
-                    mt={2}
-                  >
-                    {sinif.name}
-                  </Box>
-                </Flex>
-              </Button>
-            ))}
-          </AnimatedFlex>
-        </Flex>
-  
-        <Flex
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          p="5px"
-          w="80%"
-        >
-          <h2>Ders Listesi</h2>
-          <AnimatedFlex
-            style={dahaFazlaAnimasyon}
-            wrap="wrap"
-            justify="center"
-            gap={10}
-            maxWidth="1100px"
-            mt={"3"}
-            width="100%"
-            alignItems={"center"}
-          >
-            {dersleriGoster.map((ders) => (
-              <Button
-                key={ders.id}
-                mt={"10px"}
-                bg={"transparent"}
-                _hover={{ bg: "transparent" }}
-                variant="unstyled"
-                alignItems="center"
-                onClick={() => handleClick(ders.name)}
-              >
-                <Flex direction="column" alignItems="center" gap={2}>
-                  <Image src={`/derslerimg/${ders.icon}`} boxSize="50px" />
-                  <Box
-                    fontSize={"12px"}
-                    fontFamily={"ProximaNova, Helvetica, Arial, sans-serif"}
-                    textAlign="center"
-                    mt={2}
-                  >
-                    {ders.name}
-                  </Box>
-                </Flex>
-              </Button>
-            ))}
-          </AnimatedFlex>
-          <Flex mt="50px" alignItems="center" justifyContent="center" width="87%">
-            <AnimatedDivider
-              style={dahaFazlaAnimasyon}
-              borderColor="#58A399"
-              borderWidth="2px"
-              flex={1}
-            />
-            <Button
-              mx="2"
-              size="sm"
-              onClick={() => setTumDersleriGoster(!tumDersleriGoster)}
-              bg={"transparent"}
-            >
-              {tumDersleriGoster ? "Daha Az" : "Daha Fazlası"}
-            </Button>
-            <AnimatedDivider
-              style={dahaFazlaAnimasyon}
-              borderColor="#58A399"
-              borderWidth="2px"
-              flex={1}
-            />
-          </Flex>
-          <Flex direction={"row"} gap={10} justifyContent="center">
-            <Flex p={"0"}>
-              <s />
-            </Flex>
-  
-            <Flex
-              direction="column"
-              alignItems="center"
-              justifyContent="center"
-              p="0px"
-              w="90%"
-            >
-              {sorular.map((soru, index) => (
-                <Flex
-                  justifyContent="flex-start"
-                  p="5px"
-                  w="110%"
-                  key={soru.globalId}
-                >
-                  <Flex minWidth={"608px"} maxWidth="608px" height="auto" px={4}>
-                    <Card
-                      overflow="hidden"
-                      variant="outline"
-                      sx={{
-                        minWidth: "608px",
-                        maxWidth: "608px",
-                        minHeight: "200px",
-                      }}
-                    >
-                      <Flex pl={"20px"} pt={"15px"} alignItems="center">
-                        <Avatar
-                          size={"sm"}
-                          name={`${soru.isim} ${soru.soyisim}`}
-                          src={soru.avatar}
-                        />
-                        <Flex alignItems="center">
-                          <Button
-                            ml={2}
+        <Flex direction="row">
+            <Flex direction="column" alignItems="center" justifyContent="center" p="5px" w="100%">
+                <h2>Ders Listesi</h2>
+                {/* Dersleri listeleme */}
+                <div>
+                    {dersleriGoster.map((ders) => (
+                        <Button
+                            key={ders.id}
+                            mt="10px"
+                            mr="30px"
                             bg="transparent"
-                            _hover={{
-                              bg: "transparent",
-                              textDecoration: "underline",
-                            }}
+                            _hover={{ bg: 'transparent' }}
+                            variant="unstyled"
                             alignItems="center"
-                            fontWeight="bold"
-                            fontFamily="heading"
-                            onClick={() => handleClick(soru.dersIsim)}
-                          >
-                            {soru.sinifIsim}
-                          </Button>
-                          <Box
-                            w={1}
-                            h={1}
-                            bg="gray.800"
-                            borderRadius="full"
-                            ml={2}
-                          />
+                            onClick={() => handleClick(ders.name)}
+                        >
+                            <Flex direction="column" alignItems="center" gap={2}>
+                                <Image src={`/derslerimg/${ders.icon}`} boxSize="50px" />
+                                <Box fontSize="12px" fontFamily="ProximaNova, Helvetica, Arial, sans-serif" textAlign="center" mt={2}>
+                                    {ders.name}
+                                </Box>
+                            </Flex>
+                        </Button>
+                    ))}
+                </div>
+            </Flex>
+            {/* Puanlama modalı */}
+            <Modal isOpen={isOpen} onClose={handleCloseModal}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Puan Ver</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <Flex justifyContent="center">
+                            {[...Array(5)].map((_, index) => (
+                                <FaRegStar
+                                    key={index}
+                                    onClick={() => handleStarClick(index)}
+                                    color={index < tempRating ? 'yellow' : 'gray.300'}
+                                    style={{ cursor: 'pointer' }}
+                                />
+                            ))}
                         </Flex>
-                        <Text
-                          pl={2}
-                          fontSize="sm"
-                          fontWeight="bold"
-                          fontFamily="heading"
-                        >
-                          {soru.zamanFarki}
-                        </Text>
-  
-                        <Button
-                          marginLeft="auto"
-                          size="m"
-                          marginRight="25px"
-                          onClick={() => handleClick3(soru.globalId)}
-                        >
-                          <FaPencilAlt />
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme="blue" mr={3} onClick={handleSubmitRating}>
+                            Onayla
                         </Button>
-                      </Flex>
-  
-                      <CardBody pl={"50px"} p={2}>
-                        <Text
-                          cursor="pointer"
-                          _hover={{ textDecoration: "underline" }}
-                          borderRadius="md"
-                          fontFamily={"ProximaNova, Helvetica, Arial, sans-serif"}
-                          _active={{ bg: "gray.200" }}
-                          onClick={() => handleClick2(soru.globalId)}
-                        >
-                          {soru.soru}
-                        </Text>
-                      </CardBody>
-  
-                      <CardFooter pl={"50px"} gap={3} display="flex">
-                        <Image src={"/list.svg"} w={"30px"} h={"30px"} />
-                        <AvatarGroup size="sm" max={3}>
-                          <Avatar
-                            name="Ryan Florence"
-                            src="https://bit.ly/ryan-florence"
-                          />
-                          <Avatar
-                            name="Segun Adebayo"
-                            src="https://bit.ly/sage-adebayo"
-                          />
-                          <Avatar
-                            name="Kent Dodds"
-                            src="https://bit.ly/kent-c-dodds"
-                          />
-                          <Avatar
-                            name="Prosper Otemuyiwa"
-                            src="https://bit.ly/prosper-baba"
-                          />
-                          <Avatar
-                            name="Christian Nwamba"
-                            src="https://bit.ly/code-beast"
-                          />
-                        </AvatarGroup>
-                        <Button
-                          marginLeft="auto"
-                          colorScheme="teal"
-                          variant="outline"
-                        >
-                          Cevapla
+                        <Button variant="ghost" onClick={handleCloseModal}>
+                            Kapat
                         </Button>
-                      </CardFooter>
-                    </Card>
-                  </Flex>
-                </Flex>
-              ))}
-            </Flex>
-            <Flex>
-              <RancedList />
-            </Flex>
-          </Flex>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </Flex>
-      </Flex>
     );
-  };
-  
-  export default Alperen;
+};
+
+export default Alperen;
