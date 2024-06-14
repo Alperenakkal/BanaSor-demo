@@ -10,27 +10,27 @@ const SoruSorSayfasi = () => {
   const [sinif, setSinif] = useState("");
   const navigate = useNavigate();
   const toast = useToast();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-   
-
+  
     try {
       const token = localStorage.getItem("jwt");
+      console.log(token);
       const response = await axios.post(
         "http://localhost:3000/soru/sor",
         {
+          soru: soru,
+          dersName: ders,
+          sinif: sinif,
+        },
+        {
           headers: {
-            soru:soru,
-            dersName:ders,
-            sinif:sinif,
             Authorization: `Bearer ${token}`,
           },
         }
       );
-
-      if (response.status === 200) {
+  
+      if (response.status === 201) {
         toast({
           title: "Soru başarıyla eklendi.",
           status: "success",
@@ -51,6 +51,7 @@ const SoruSorSayfasi = () => {
       });
     }
   };
+  
 
   return (
     <Flex gap={4}>

@@ -69,41 +69,40 @@ const getUserSoru = async (req, res) => {
   }
   
 
-  const soruSor=async(req,res)=>{
-    try {        
+  const soruSor = async (req, res) => {
+    try {
       const id = req.user._id;
-      const {  dersName, soru, cevaplar,sinif } = req.body;
-
+      const { dersName, soru, cevaplar, sinif } = req.body;
+  
       let soruPicUrl = '';
       if (req.file) {
-          const result = await cloudinary.uploader.upload(req.file.path, {
-              folder: 'profile_pics'
-          });
-          soruPicUrl = result.secure_url;
-      } 
-      
-
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'profile_pics'
+        });
+        soruPicUrl = result.secure_url;
+        // Remove the file from the server after uploading to cloudinary
+        fs.unlinkSync(req.file.path);
+      }
+  
       const newSoru = new Soru({
-          userId:id,
-          dersName,
-          soru,
-          cevaplar,
-          soruPic: soruPicUrl,
-          sinif,
+        userId: id,
+        dersName,
+        soru,
+        cevaplar,
+        soruPic: soruPicUrl,
+        sinif,
       });
-
+  
       const savedSoru = await newSoru.save();
       res.status(201).json(savedSoru);
-      fs.unlinkSync(soruPicUrl);
-
     } catch (error) {
-      res.status(500).json({ message:"bağlanamadı" });
-      console.log(error.message)
+      if (!res.headersSent) {
+        res.status(500).json({ message: "bağlanamadı" });
+      }
+      console.log(error.message);
     }
-
-
-
   }
+  
 
 
   const getSorular = async (req, res) => {
