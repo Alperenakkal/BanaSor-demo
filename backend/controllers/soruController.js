@@ -72,7 +72,7 @@ const getUserSoru = async (req, res) => {
   const soruSor=async(req,res)=>{
     try {        
       const id = req.user._id;
-      const {  dersName, soru, cevaplar } = req.body;
+      const {  dersName, soru, cevaplar,sinif } = req.body;
 
       let soruPicUrl = '';
       if (req.file) {
@@ -89,6 +89,7 @@ const getUserSoru = async (req, res) => {
           soru,
           cevaplar,
           soruPic: soruPicUrl,
+          sinif,
       });
 
       const savedSoru = await newSoru.save();

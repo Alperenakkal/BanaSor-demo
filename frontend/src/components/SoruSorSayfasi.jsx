@@ -1,95 +1,110 @@
-import React from "react";
-import {
-  Card,
-  Box,
-  Flex,
-  Text,
-  Textarea,
-  Select,
-  Button,
-} from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@chakra-ui/react";
+import { useState } from 'react';
+import { Card, Box, Flex, Text, Textarea, Select, Button } from '@chakra-ui/react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@chakra-ui/react';
+import axios from 'axios';
 
 const SoruSorSayfasi = () => {
+  const [soru, setSoru] = useState("");
+  const [ders, setDers] = useState("");
+  const [sinif, setSinif] = useState("");
   const navigate = useNavigate();
   const toast = useToast();
-  const [soruMetni, setSoruMetni] = React.useState("");
-  const [konuSecimi, setKonuSecimi] = React.useState("");
-  const [sınıfSecimi, setSınıfSecimi] = React.useState("");
 
-  const handleClick = () => {
-    if (!soruMetni || !konuSecimi || !sınıfSecimi) {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+   
+
+    try {
+      const token = localStorage.getItem("jwt");
+      const response = await axios.post(
+        "http://localhost:3000/soru/sor",
+        {
+          headers: {
+            soru:soru,
+            dersName:ders,
+            sinif:sinif,
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        toast({
+          title: "Soru başarıyla eklendi.",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+        navigate("/sorulistesi");
+      } else {
+        throw new Error("Soru eklenemedi");
+      }
+    } catch (error) {
       toast({
-        title: "Hata!",
-        description: "Lütfen önce bir soru metni yazın ve bir konu seçin!",
+        title: "Bir hata oluştu.",
+        description: error.message,
         status: "error",
-        duration: 5000,
+        duration: 3000,
         isClosable: true,
       });
-    } else {
-      navigate("/sorulistesi");
     }
   };
 
   return (
     <Flex gap={4}>
       <Card w="700px" h="460px">
-        <Box
-          p="4"
-          display="flex"
-          flexDirection="column"
-          alignItems="flex-start"
-        >
+        <Box p="4" display="flex" flexDirection="column" alignItems="flex-start">
           <Text mb="5" fontWeight="bold">
             Ödevin hakkındaki sorunu sorabilirsin.
           </Text>
-          <Textarea
-            borderRadius="35px"
-            mb="8"
-            width="600px"
-            height="200px"
-            placeholder="Anlaşılır biçimde yazılan sorular daha çabuk cevap alır. Şimdi yazabilirsin..."
-            value={soruMetni}
-            onChange={(e) => setSoruMetni(e.target.value)}
-          />
-          <Flex gap={4}>
-            <Select
-              borderRadius="50px"
-              mb="6"
-              w="200px"
-              placeholder="Sınıf Seçin"
-              value={sınıfSecimi}
-              onChange={(e) => setSınıfSecimi(e.target.value)}
-            >
-              <option value="">Seçiniz</option>
-              <option value="İlkokul">İlkokul</option>
-              <option value="Ortaokul">Ortaokul</option>
-              <option value="Lise">Lise</option>
-              <option value="Üniversite">Üniversite</option>
-            </Select>
-            <Select
-              borderRadius="50px"
-              mb="6"
-              w="200px"
-              placeholder="Konu Seçin"
-              value={konuSecimi}
-              onChange={(e) => setKonuSecimi(e.target.value)}
-            >
-              <option value="">Seçiniz</option>
-              <option value="Matematik">Matematik</option>
-              <option value="Fizik">Fizik</option>
-              {/* Add more options */}
-            </Select>
-          </Flex>
-          <Button
-            borderRadius="50px"
-            bg={"#36454F"}
-            color="white"
-            onClick={handleClick}
-          >
-            SORUNU EKLE
-          </Button>
+          <form onSubmit={handleSubmit}>
+            <Textarea
+              borderRadius="35px"
+              mb="8"
+              width="600px"
+              height="200px"
+              placeholder="Anlaşılır biçimde yazılan sorular daha çabuk cevap alır. Şimdi yazabilirsin..."
+              value={soru}
+              onChange={(e) => setSoru(e.target.value)}
+              isRequired
+            />
+            <Flex gap={4}>
+              <Select
+                borderRadius="50px"
+                mb="6"
+                w="200px"
+                placeholder="Sınıf Seçin"
+                value={sinif}
+                onChange={(e) => setSinif(e.target.value)}
+                isRequired
+              >
+                <option value="">Seçiniz</option>
+                <option value="İlkokul">İlkokul</option>
+                <option value="Ortaokul">Ortaokul</option>
+                <option value="Lise">Lise</option>
+                <option value="Üniversite">Üniversite</option>
+              </Select>
+              <Select
+                borderRadius="50px"
+                mb="6"
+                w="200px"
+                placeholder="Ders Seçin"
+                value={ders}
+                onChange={(e) => setDers(e.target.value)}
+                isRequired
+              >
+                <option value="">Seçiniz</option>
+                <option value="Matematik">Matematik</option>
+                <option value="Fizik">Fizik</option>
+                {/* Diğer seçenekler */}
+              </Select>
+            </Flex>
+            <Button borderRadius="50px" bg={"#36454F"} color="white" type="submit">
+              SORUNU EKLE
+            </Button>
+          </form>
         </Box>
       </Card>
 

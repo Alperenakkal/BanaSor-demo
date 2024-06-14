@@ -29,6 +29,9 @@ const soruSchema = new Schema({
          type: Number,
           default: 0 
         },
+     sinif: {
+            type: String,
+           },
     cevaplar: [{
      
             type:mongoose.Schema.Types.ObjectId,
