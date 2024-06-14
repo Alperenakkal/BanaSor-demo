@@ -10,41 +10,24 @@ import {
   MenuItem,
   Spinner,
   Collapse,
-  useDisclosure,
   Input,
   Button,
   Image,
+  InputGroup,
+  InputRightElement,
 } from "@chakra-ui/react";
-import { HamburgerIcon, CloseIcon, SettingsIcon } from "@chakra-ui/icons";
-import { useNavigate } from "react-router-dom";
-import { FaUser } from "react-icons/fa"; // Importing the user icon
+import { HamburgerIcon, CloseIcon, SettingsIcon, SearchIcon } from "@chakra-ui/icons";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const [searchText, setSearchText] = useState('');
+  const [results, setResults] = useState([]);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { isOpen, onToggle } = useDisclosure();
-  const [searchText, setSearchText] = useState("");
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [kullaniciid, setKullaniciId] = useState(0);
   const [userTokenData, setUserTokenData] = useState(null);
-  const [kullaniciidReady, setKullaniciIdReady] = useState(false);
-
-  const handleClick1 = () => {
-    navigate("/");
-  };
-
-  const handleSearch = () => {
-    console.log("Aranan metin:", searchText);
-    setSearchText("");
-  };
-
-  const handleClick = () => {
-    navigate("/signup");
-  };
-
-  const handleLogout = () => {
-    navigate("/");
-  };
 
   useEffect(() => {
     const fetchTokenUserData = async () => {
@@ -56,18 +39,49 @@ const Navbar = () => {
           },
         });
         setUserTokenData(response.data);
-        if (response.data && response.data._id) {
-          setKullaniciId(response.data._id);
-          setKullaniciIdReady(true);
-          setLoading(false);
-        }
       } catch (error) {
         console.error("Kullanıcı verilerini alma hatası:", error);
-        setLoading(false);
       }
     };
     fetchTokenUserData();
   }, []);
+
+  const handleSearch = async () => {
+    if (searchText.trim() === '') return;
+
+    setLoading(true);
+    setError('');
+    setResults([]);
+
+    try {
+      const response = await axios.get(`http://localhost:3000/soru/search?q=${searchText}`);
+      setResults(response.data);
+      if (response.data.length === 0) {
+        setError('Arama sonucu bulunamadı.');
+      }
+    } catch (error) {
+      console.error('Arama sırasında hata oluştu:', error);
+      setError('Arama sırasında bir hata oluştu.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const handleClick1 = () => {
+    navigate("/");
+  };
+
+  const handleLogout = () => {
+    // Çıkış işlemi
+    // localStorage veya state temizleme gibi işlemler yapılabilir
+    navigate("/");
+  };
 
   return (
     <Box>
@@ -89,22 +103,50 @@ const Navbar = () => {
           />
         </Flex>
         <Flex flex={{ base: 1 }} justify={{ base: "center", md: "start" }}>
-        <Box cursor="pointer" onClick={() => handleClick1()} display="flex" alignItems="center">
-
-            
+          <Box cursor="pointer" onClick={handleClick1} display="flex" alignItems="center">
             <Box ml={2} fontWeight="bold" fontSize="lg">
-            <Image src="/banasorlogo.png" alt="Logo" w={20} h={20} />
+              <Image src="/banasorlogo.png" alt="Logo" w={20} h={20} />
             </Box>
           </Box>
           <Flex display={{ base: "none", md: "flex" }} ml={10} alignItems="center">
-            <Input
-              variant="filled"
-              placeholder="Search"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              _focus={{ boxShadow: "none" }}
-            />
+            <InputGroup w="470px" size="md">
+              <Input
+                pr="4.5rem"
+                type="text"
+                placeholder="Herhangi bir soruya cevap arayabilirsin."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+              <InputRightElement>
+                <IconButton
+                  h="1.75rem"
+                  size="sm"
+                  aria-label="Ara"
+                  icon={loading ? <Spinner size="xs" /> : <SearchIcon />}
+                  onClick={handleSearch}
+                />
+              </InputRightElement>
+            </InputGroup>
+            {error && <Box color="red" mt="0.5rem">{error}</Box>}
+            <Flex direction="column" mt="4" w="470px">
+              {results.length === 0 && !loading && (
+                <Box mt="4" color="gray.600">
+                  Arama sonuçları bulunamadı.
+                </Box>
+              )}
+
+              {results.length > 0 && (
+                <Flex direction="column" mt="4" w="470px">
+                  {results.map((result) => (
+                    <Box key={result._id} p="2" borderWidth="1px" borderRadius="lg" mb="2">
+                      <Heading as="h3" size="md" mb="1">{result.soru}</Heading>
+                      <Box>{result.dersName}</Box>
+                    </Box>
+                  ))}
+                </Flex>
+              )}
+            </Flex>
             <Button ml={2} onClick={handleSearch} colorScheme="teal">
               Search
             </Button>
@@ -128,7 +170,9 @@ const Navbar = () => {
           </Menu>
         </Stack>
       </Flex>
-      <Collapse in={isOpen} animateOpacity></Collapse>
+      <Collapse in={isOpen} animateOpacity>
+
+      </Collapse>
     </Box>
   );
 };
