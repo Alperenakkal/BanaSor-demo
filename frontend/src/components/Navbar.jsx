@@ -16,6 +16,7 @@ import {
   InputGroup,
   InputRightElement,
   useDisclosure,
+  Heading,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, SettingsIcon, SearchIcon } from "@chakra-ui/icons";
 import axios from "axios";
