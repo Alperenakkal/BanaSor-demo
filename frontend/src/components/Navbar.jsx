@@ -85,6 +85,10 @@ const Navbar = () => {
     navigate("/");
   };
 
+  const handleSoruDetay = (soruId) => {
+    navigate(`/sorudetay/${soruId}`);
+  };
+
   return (
     <Box>
       <Flex
@@ -95,23 +99,36 @@ const Navbar = () => {
         borderStyle="solid"
         borderColor="gray.200"
         align="center"
+        direction="column" // Navbar içeriğinin dikey yönde sıralanmasını sağlar
       >
-        <Flex flex={{ base: 1, md: "auto" }} ml={{ base: -2 }} display={{ base: "flex", md: "none" }}>
+        <Flex
+          w="100%"
+          justify="space-between"
+          align="center"
+          px={{ base: 4 }}
+          mb={{ base: 2, md: 0 }}
+        >
           <IconButton
             onClick={onToggle}
             icon={isOpen ? <CloseIcon w={3} h={3} /> : <HamburgerIcon w={5} h={5} />}
             variant="ghost"
             aria-label="Toggle Navigation"
+            display={{ base: "flex", md: "none" }}
           />
-        </Flex>
-        <Flex flex={{ base: 1 }} justify={{ base: "center", md: "start" }}>
+
           <Box cursor="pointer" onClick={handleClick1} display="flex" alignItems="center">
             <Box ml={2} fontWeight="bold" fontSize="lg">
               <Image src="/banasorlogo.png" alt="Logo" w={20} h={20} />
             </Box>
           </Box>
-          <Flex display={{ base: "none", md: "flex" }} ml={10} alignItems="center">
-            <InputGroup w="470px" size="md">
+
+          <Flex
+            display={{ base: "none", md: "flex" }}
+            alignItems="center"
+            w="100%"
+            maxW="470px" // İlgili alana uygun genişlik sınırı
+          >
+            <InputGroup size="md" w="100%">
               <Input
                 pr="4.5rem"
                 type="text"
@@ -131,30 +148,12 @@ const Navbar = () => {
               </InputRightElement>
             </InputGroup>
             {error && <Box color="red" mt="0.5rem">{error}</Box>}
-            <Flex direction="column" mt="4" w="470px">
-              {results.length === 0 && !loading && (
-                <Box mt="4" color="gray.600">
-                  Arama sonuçları bulunamadı.
-                </Box>
-              )}
-
-              {results.length > 0 && (
-                <Flex direction="column" mt="4" w="470px">
-                  {results.map((result) => (
-                    <Box key={result._id} p="2" borderWidth="1px" borderRadius="lg" mb="2">
-                      <Heading as="h3" size="md" mb="1">{result.soru}</Heading>
-                      <Box>{result.dersName}</Box>
-                    </Box>
-                  ))}
-                </Flex>
-              )}
-            </Flex>
+            
             <Button ml={2} onClick={handleSearch} colorScheme="teal">
               Search
             </Button>
           </Flex>
-        </Flex>
-        <Stack flex={{ base: 1, md: 0 }} justify="flex-end" direction="row" spacing={6}>
+          
           <Menu>
             <MenuButton as={IconButton} icon={<SettingsIcon />} />
             <MenuList>
@@ -170,11 +169,31 @@ const Navbar = () => {
               <MenuItem onClick={handleLogout}>ÇIKIŞ YAP</MenuItem>
             </MenuList>
           </Menu>
-        </Stack>
-      </Flex>
-      <Collapse in={isOpen} animateOpacity>
+        </Flex>
 
-      </Collapse>
+        <Flex direction="column" mt="4" w="100%">
+          {results.map((soru) => (
+            <Box
+              key={soru._id}
+              p="2"
+              borderWidth="1px"
+              borderRadius="lg"
+              mb="2"
+              cursor="pointer"
+              onClick={() => handleSoruDetay(soru._id)}
+            >
+              <Heading as="h3" size="md" mb="1">
+                {soru.soru}
+              </Heading>
+              <Box>{soru.dersName}</Box>
+            </Box>
+          ))}
+        </Flex>
+
+        <Collapse in={isOpen} animateOpacity>
+
+        </Collapse>
+      </Flex>
     </Box>
   );
 };

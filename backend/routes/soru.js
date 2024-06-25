@@ -15,7 +15,7 @@ router.get('/user/:userName',getUserSoru)
 router.post('/sor',protectRoute, upload.single('soruPic') ,soruSor)
 router.get('/sorular',getSorular)
 router.get('/search', searchSorular)
-router.put('/rate/:questionId',addRating)
+router.put('/rate/:soruId',addRating)
 router.put('/guncelle/:soruId', updateSoru);
 router.get('/:soruId', getSoruById);
 

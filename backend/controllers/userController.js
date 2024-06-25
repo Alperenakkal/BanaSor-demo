@@ -293,7 +293,8 @@ const getTopUsers = async (req, res) => {
         const response = users.map(user => ({
             userName: user.userName,
             totalPoints: user.totalPoints,
-            voteCount: user.voteCount
+            voteCount: user.voteCount,
+            profilePic: user.profilePic
         }));
         res.json(response);
     } catch (error) {

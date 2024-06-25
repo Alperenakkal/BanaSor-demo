@@ -4,77 +4,72 @@ import { Card, CardBody } from '@chakra-ui/card';
 import { Image } from '@chakra-ui/image';
 import { Box, Flex, Text } from '@chakra-ui/layout';
 import React, { useEffect, useState } from 'react';
-import { TimeCal } from './TimeCal';
+import axios from 'axios'; // Axios eklenmeli
 
+const Kisiler = () => {
+    const [topUsers, setTopUsers] = useState([]);
 
-const kisiler = () => {
-    
-        const kisiler = [
-            { name: "Alperen Akal", puan: 85, src: "https://randomuser.me/api/portraits/men/1.jpg" },
-            { name: "EMine Aydınlı", puan: 90, src: "https://randomuser.me/api/portraits/women/2.jpg" },
-            { name: "Huseyin Baka", puan: 75, src: "https://randomuser.me/api/portraits/men/3.jpg" },
-            { name: "Fatma Öztürk", puan: 88, src: "https://randomuser.me/api/portraits/women/4.jpg" },
-            { name: "Mustafa Arslan", puan: 92, src: "https://randomuser.me/api/portraits/men/5.jpg" },
-            { name: "Zeynep Çelik", puan: 80, src: "https://randomuser.me/api/portraits/women/6.jpg" },
-            { name: "Emir Şahin", puan: 87, src: "https://randomuser.me/api/portraits/men/7.jpg" },
-            { name: "Elif Erdoğan", puan: 93, src: "https://randomuser.me/api/portraits/women/8.jpg" },
-            { name: "Osman Yıldırım", puan: 78, src: "https://randomuser.me/api/portraits/men/9.jpg" },
-            { name: "Ali Doğan", puan: 84, src: "https://randomuser.me/api/portraits/women/10.jpg" },
-            { name: "fadime Aydın", puan: 89, src: "https://randomuser.me/api/portraits/men/11.jpg" },
-           
-        ];
-        
-        const [sorular, setSorular] = useState([]);
+    useEffect(() => {
+        const fetchTopUsers = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/kullanici/eniyiler'); // Backend endpointi
+                console.log(response.data);
+                setTopUsers(response.data);
+            } catch (error) {
+                console.error(error);
+            }
+        };
 
-        useEffect(() => {
-            fetch('/sorular.json')
-                .then(response => response.json())
-                .then(data => {
-                    const filtrelenmisSorular = data.sorular
-                        .flatMap(ders => 
-                            ders.sorular.map(soru => 
-                                ({
-                                    ...soru,
-                                    dersIsim: ders.isim,
-                                    zamanFarki: TimeCal(soru.soruSorulmaSuresi)
-                                })))
-                    setSorular(filtrelenmisSorular);
-                });
-        }, []);
+        fetchTopUsers();
+    }, []);
 
-    const [genisletildi, setGenisletildi] = useState(false);
+    const [expanded, setExpanded] = useState(false);
 
-    const gosterilenKisiler = genisletildi ? sorular : sorular.slice(0, 5);
-    const buttonText = genisletildi ? "Daralt" : "Genişlet";
+    const displayedUsers = expanded ? topUsers : topUsers.slice(0, 5);
+    const buttonText = expanded ? "Daralt" : "Genişlet";
 
-    const toggleGenisletme = () => {
-        setGenisletildi(!genisletildi);
+    const toggleExpansion = () => {
+        setExpanded(!expanded);
+    };
+
+    // displayedUsers null veya undefined ise, yükleniyor durumunu göster
+    if (!displayedUsers) {
+        return <div>Loading...</div>; // veya uygun bir yükleme göstergesi
     }
+
+    console.log(displayedUsers);
+    if (!Array.isArray(displayedUsers)) {
+        // displayedUsers bir dizi değilse veya undefined/null ise, hata işlemlerini burada yapabilirsiniz
+        console.error('displayedUsers bir dizi değil veya tanımsız.');
+        return null; // veya boş bir JSX döndürebilirsiniz
+      }
+      
 
     return (
         <Flex flexDirection="column" alignItems="center">
-            <Card height={genisletildi ? "auto" : "400px"} width="300px" mb="4">
+            <Card height={expanded ? "auto" : "400px"} width="300px" mb="4">
                 <CardBody>
                     <Flex mb="20px" alignItems="center">
                         <Image src="/crown-icon.svg" w="30" h="30" mr="2" />
                         <Text fontSize="18px" fontWeight="bold" textDecoration="underline">En İyiler</Text>
                     </Flex>
                     <Flex flexDirection="column" alignItems="flex-start">
-                        {gosterilenKisiler.map((kisi, index) => (
+                        {displayedUsers.map((user, index) => (
                             <Box key={index} maxW="200px" margin="auto" mb="7" mr="1" ml="2" display="flex" alignItems="center">
-                               <Avatar src={kisi.avatar} size="xs" />
-                                <Text mt={2} ml={2} fontSize="13px" fontWeight="bold">{`${kisi.isim} ${kisi.soyisim}` }</Text>
-                                <Text ml={8} fontSize="15px">{kisi.puan} p</Text>
+                                <Avatar src={user.profilePic} size="xs" />
+                                <Text mt={2} ml={2} fontSize="13px" fontWeight="bold">{user.userName}</Text>
+                                <Text ml={8} fontSize="15px">{user.totalPoints} p</Text>
                             </Box>
                         ))}
                     </Flex>
                 </CardBody>
-                <Button colorScheme="teal" size="sm" alignSelf="center" onClick={toggleGenisletme} mb="10px">
+                <Button colorScheme="teal" size="sm" alignSelf="center" onClick={toggleExpansion} mb="10px">
                     {buttonText}
                 </Button>
+
             </Card>
         </Flex>
     );
-}
+};
 
-export default kisiler;
+export default Kisiler;
