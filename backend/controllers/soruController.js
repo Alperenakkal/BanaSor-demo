@@ -69,40 +69,41 @@ const getUserSoru = async (req, res) => {
   }
   
 
-  const soruSor = async (req, res) => {
-    try {
+  
+const soruSor = async (req, res) => {
+  try {
       const id = req.user._id;
       const { dersName, soru, cevaplar, sinif } = req.body;
-  
+
       let soruPicUrl = '';
       if (req.file) {
-        const result = await cloudinary.uploader.upload(req.file.path, {
-          folder: 'profile_pics'
-        });
-        soruPicUrl = result.secure_url;
-        // Remove the file from the server after uploading to cloudinary
-        fs.unlinkSync(req.file.path);
+          const tempFilePath = req.file.path; // Temp path
+          const result = await cloudinary.uploader.upload(tempFilePath, {
+              folder: 'profile_pics'
+          });
+          soruPicUrl = result.secure_url;
+          // Remove the file from the temp folder after uploading to Cloudinary
+          fs.unlinkSync(tempFilePath);
       }
-  
+
       const newSoru = new Soru({
-        userId: id,
-        dersName,
-        soru,
-        cevaplar,
-        soruPic: soruPicUrl,
-        sinif,
+          userId: id,
+          dersName,
+          soru,
+          cevaplar,
+          soruPic: soruPicUrl,
+          sinif,
       });
-  
+
       const savedSoru = await newSoru.save();
       res.status(201).json(savedSoru);
-    } catch (error) {
+  } catch (error) {
       if (!res.headersSent) {
-        res.status(500).json({ message: "bağlanamadı" });
+          res.status(500).json({ message: "bağlanamadı" });
       }
       console.log(error.message);
-    }
   }
-  
+};
 
 
   const getSorular = async (req, res) => {
@@ -122,31 +123,32 @@ const getUserSoru = async (req, res) => {
 
 const updateSoru = async (req, res) => {
   try {
-    const soruId = req.params.soruId;
+      const soruId = req.params.soruId;
       let { dersName, soru, cevaplar } = req.body;
 
-      // Mevcut soruyu veritabanından bul
       const existingSoru = await Soru.findById(soruId);
-      if (!existingSoru) {  
+      if (!existingSoru) {
           return res.status(404).json({ error: "Soru bulunamadı" });
       }
 
-      
       let soruPicUrl = existingSoru.soruPic;
       if (req.file) {
-          const result = await cloudinary.uploader.upload(req.file.path, {
+          const tempFilePath = req.file.path;
+
+          const result = await cloudinary.uploader.upload(tempFilePath, {
               folder: 'soru_pics'
           });
           soruPicUrl = result.secure_url;
+
+          // Dosyayı Cloudinary'e yükledikten sonra geçici dosyayı sil
+          fs.unlinkSync(tempFilePath);
       }
 
-      
       existingSoru.dersName = dersName || existingSoru.dersName;
       existingSoru.soru = soru || existingSoru.soru;
       existingSoru.cevaplar = cevaplar || existingSoru.cevaplar;
       existingSoru.soruPic = soruPicUrl;
 
-      
       const updatedSoru = await existingSoru.save();
       res.status(200).json(updatedSoru);
   } catch (error) {

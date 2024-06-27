@@ -1,9 +1,9 @@
 const multer = require('multer');
 const path = require('path');
 
-// Set storage engine
+// Set storage engine to /tmp
 const storage = multer.diskStorage({
-    destination: './uploads/',
+    destination: '/tmp/', // Geçici dizin
     filename: (req, file, cb) => {
         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
