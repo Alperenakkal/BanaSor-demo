@@ -1,9 +1,10 @@
 const multer = require('multer');
 const path = require('path');
+const os = require('os'); // Require the os module
 
 // Set storage engine to /tmp
 const storage = multer.diskStorage({
-    destination: '/tmp/', // Geçici dizin
+    destination: os.tmpdir(),// Geçici dizin
     filename: (req, file, cb) => {
         cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
