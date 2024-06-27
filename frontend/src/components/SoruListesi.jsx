@@ -29,6 +29,27 @@ import axios from 'axios';
 
 const AnimatedDivider = animated(Divider);
 
+const calculateElapsedTime = (isoDate) => {
+    const currentDate = new Date();
+    const givenDate = new Date(isoDate);
+    const timeDifferenceInMilliseconds = currentDate - givenDate;
+
+    const timeDifferenceInSeconds = Math.floor(timeDifferenceInMilliseconds / 1000);
+    const timeDifferenceInMinutes = Math.floor(timeDifferenceInMilliseconds / (1000 * 60));
+    const timeDifferenceInHours = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60));
+    const timeDifferenceInDays = Math.floor(timeDifferenceInMilliseconds / (1000 * 60 * 60 * 24));
+
+    if (timeDifferenceInDays > 0) {
+        return `${timeDifferenceInDays} gün önce`;
+    } else if (timeDifferenceInHours > 0) {
+        return `${timeDifferenceInHours} saat önce`;
+    } else if (timeDifferenceInMinutes > 0) {
+        return `${timeDifferenceInMinutes} dakika önce`;
+    } else {
+        return `${timeDifferenceInSeconds} saniye önce`;
+    }
+}; 
+
 const Alperen = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [selectedSoruIndex, setSelectedSoruIndex] = useState(null);
@@ -44,20 +65,41 @@ const Alperen = () => {
             .then((data) => setDersler(data.dersler));
     }, []);
 
+    
     useEffect(() => {
-        fetch('/sorular.json')
-            .then((response) => response.json())
-            .then((data) => {
-                const filtrelenmisSorular = data.sorular.flatMap((ders) =>
-                    ders.sorular.map((soru) => ({
-                        ...soru,
-                        dersIsim: ders.isim,
-                        zamanFarki: TimeCal(soru.soruSorulmaSuresi),
-                        selectedRating: 0,
-                    }))
-                );
-                setSorular(filtrelenmisSorular);
-            });
+        const fetchData = async () => {
+            try {
+                const soruResponse = await axios.get(`http://localhost:3000/soru/sorular`);
+                const soruData = soruResponse.data;
+                setSorular(soruData);
+    
+                // Log the retrieved soruData for debugging
+             
+    
+                const userDataPromises = soruData.map(async (item) => {
+                    // Log the userId for each item
+                   
+                    if (item.userId) {
+                        const response = await axios.get(`http://localhost:3000/kullanici/getUser/id/${item.userId}`);
+                        return response.data;
+                    } else {
+                        // If userId is undefined, return null
+                        return null;
+                    }
+                });
+    
+                const userData = await Promise.all(userDataPromises);
+                const updatedSoruList = soruData.map((item, index) => ({
+                    ...item,
+                    userData: userData[index],
+                }));
+                setSorular(updatedSoruList);
+            } catch (error) {
+                console.error('Veri alma hatası:', error);
+            }
+        };
+    
+        fetchData();
     }, []);
 
     const handleOpenModal = (soruIndex) => {
@@ -73,6 +115,7 @@ const Alperen = () => {
     const handleStarClick = (starIndex) => {
         setTempRating(starIndex + 1);
     };
+    console.log(sorular)
 
     
 
@@ -80,11 +123,13 @@ const Alperen = () => {
       if (selectedSoruIndex !== null) {
           const soru = sorular[selectedSoruIndex];
           try {
-              const response = await axios.put(`/rate/soruId`, {
+              const token = localStorage.getItem('jwt');
+              const response = await axios.put(`http://localhost:3000/soru/rate/${soru._id}`, {
                   points: tempRating
               }, {
                   headers: {
-                      'Content-Type': 'application/json'
+                      'Content-Type': 'application/json',
+                      Authorization: `Bearer ${token}`
                   }
               });
   
@@ -141,7 +186,7 @@ const Alperen = () => {
 
     return (
         <Flex direction="row">
-            <Flex direction="column" alignItems="center" justifyContent="center" p="5px" w="100%">
+            <Flex  direction="column" alignItems="center" justifyContent="center" p="5px" w="100%">
                 <h2>Ders Listesi</h2>
                 <animated.div
                     style={dahaFazlaAnimasyon}
@@ -152,66 +197,106 @@ const Alperen = () => {
                     mt="3"
                     width="100%"
                     alignItems="center"
+                   
                 >
                     {dersleriGoster.map((ders) => (
-                        <Button
-                            key={ders.id}
-                            mt="10px"
-                            bg="transparent"
-                            _hover={{ bg: 'transparent' }}
-                            variant="unstyled"
-                            alignItems="center"
-                            onClick={() => handleClick(ders.name)}
-                            mr="25px"
-                        >
-                            <Flex direction="column" alignItems="center" gap={2}>
-                                <Image src={`/derslerimg/${ders.icon}`} boxSize="50px" />
-                                <Box fontSize="12px" fontFamily="ProximaNova, Helvetica, Arial, sans-serif" textAlign="center" mt={2}>
-                                    {ders.name}
-                                </Box>
-                            </Flex>
-                        </Button>
-                    ))}
-                </animated.div>
-                <Flex mt="50px" alignItems="center" justifyContent="center" width="87%">
+              <Button
+                key={ders.id}
+                mt={"10px"}
+                bg={"transparent"}
+                _hover={{ bg: "transparent" }}
+                variant="unstyled"
+                alignItems="center"
+                onClick={() => handleClick(ders.name)}
+                ml="30px"
+                
+              >
+                <Flex direction="column" alignItems="center" gap={2}>
+                  <Image src={`/derslerimg/${ders.icon}`} boxSize="50px" />
+                  <Box
+                    fontSize={"12px"}
+                    fontFamily={"ProximaNova, Helvetica, Arial, sans-serif"}
+                    textAlign="center"
+                    mt={2}
+                  >
+                    {ders.name}
+                  </Box>
+                </Flex>
+              </Button>
+            ))}
+         </animated.div>
+                
+                <Flex mb="60px" mt="50px" alignItems="center" justifyContent="center" width="87%">
                     <AnimatedDivider style={dahaFazlaAnimasyon} borderColor="#58A399" borderWidth="2px" flex={1} />
-                    <Button mx="2" size="sm" onClick={() => setTumDersleriGoster(!tumDersleriGoster)} bg="transparent">
+                    <Button mt="80px" mx="2" size="sm" onClick={() => setTumDersleriGoster(!tumDersleriGoster)} bg="transparent">
                         {tumDersleriGoster ? 'Daha Az' : 'Daha Fazlası'}
                     </Button>
                     <AnimatedDivider style={dahaFazlaAnimasyon} borderColor="#58A399" borderWidth="2px" flex={1} />
                 </Flex>
                 <Flex direction="row" gap={20}>
                     <Flex direction="column" alignItems="center" justifyContent="center" p="5px" w="100%">
-                        {sorular.map((soru, index) => (
-                            <Flex justifyContent="flex-start" p="5px" w="100%" pl="65px" key={soru.globalId}>
-                                <Flex minWidth="608px" maxWidth="608px" height="auto" px={4}>
-                                    <Card overflow="hidden" variant="outline" sx={{ minWidth: '608px', maxWidth: '608px', minHeight: '200px' }}>
-                                        <Flex pl="20px" pt="15px" alignItems="center">
-                                            <Avatar size="sm" name={`${soru.isim} ${soru.soyisim}`} src={soru.avatar} />
-                                            <Flex alignItems="center">
-                                                <Button
-                                                    ml={2}
-                                                    bg="transparent"
-                                                    _hover={{ bg: 'transparent', textDecoration: 'underline' }}
-                                                    alignItems="center"
-                                                    fontWeight="bold"
-                                                    fontFamily="heading"
-                                                    onClick={() => handleClick(soru.dersIsim)}
-                                                >
-                                                    {soru.dersIsim}
-                                                </Button>
-                                                <Box w={1} h={1} bg="gray.800" borderRadius="full" ml={2} />
-                                            </Flex>
-                                            <Text pl={2} fontSize="sm" fontWeight="bold" fontFamily="heading">
-                                                {soru.zamanFarki}
-                                            </Text>
-                                            <Spacer />
-                                            <Button size="m" marginRight="10px" onClick={() => handleOpenModal(index)}>
+                    {sorular && sorular.map((soru, index) => (
+                <Flex
+                  justifyContent="flex-start"
+                  p="5px"
+                  w="110%"
+                  key={soru.globalId}
+                >
+                  <Flex minWidth={"608px"} maxWidth="608px" height="auto" px={4}>
+                    <Card
+                      overflow="hidden"
+                      variant="outline"
+                      sx={{
+                        minWidth: "608px",
+                        maxWidth: "608px",
+                        minHeight: "200px",
+                      }}
+                    >
+                      <Flex  pl={"20px"} pt={"15px"} alignItems="center">
+                      {soru.userData ? (
+                                        <Avatar size={"sm"} name={soru.userData.fullName} src={soru.userData.profilePic} />
+                                    ) : (
+                                        <Avatar size={"sm"} />
+                                    )}
+                        <Flex alignItems="center">
+                          <Button
+                            ml={2}
+                            bg="transparent"
+                            _hover={{
+                              bg: "transparent",
+                              textDecoration: "underline",
+                            }}
+                            alignItems="center"
+                            fontWeight="bold"
+                            fontFamily="heading"
+                            onClick={() => handleClick(soru.dersName)}
+                          >
+                            {soru.dersName}
+                          </Button>
+                          <Box
+                            w={1}
+                            h={1}
+                            bg="gray.800"
+                            borderRadius="full"
+                            ml={2}
+                          />
+                        </Flex>
+                        <Text
+                          pl={2}
+                          fontSize="sm"
+                          fontWeight="bold"
+                          fontFamily="heading"
+                        >
+                         {calculateElapsedTime(soru.createdAt)}
+                        </Text>
+                        <Flex justify="flex-end">
+                            <Spacer/>
+                        <Button ml="300px" size="m" marginRight="10px" onClick={() => handleOpenModal(index)}>
                                                 <FaRegStar />
                                             </Button>
-                                            <Button size="m" marginRight="10px" onClick={() => handleClick3(soru.globalId)}>
-                                                <FaPencilAlt />
-                                            </Button>
+                                           
+                        </Flex>
+                                       
                                             <Modal isOpen={isOpen} onClose={handleCloseModal}>
                                                 <ModalOverlay />
                                                 <ModalContent>
