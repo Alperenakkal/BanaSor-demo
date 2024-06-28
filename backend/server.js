@@ -8,7 +8,6 @@ const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 
-
 // .env dosyasını yükle
 dotenv.config();
 const bodyParser = require('body-parser');
@@ -38,8 +37,12 @@ app.get('/', (req, res) => {
 
 const kullaniciRoute = require('./routes/kullanici.js');
 const soruRoute = require('./routes/soru');
+
 app.use('/kullanici', kullaniciRoute);
 app.use('/soru', soruRoute);
+
+
+
 
 
 

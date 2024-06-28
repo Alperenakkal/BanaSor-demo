@@ -4,6 +4,7 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const storage = multer.memoryStorage(); // Dosyaları bellek üzerinde tutmak için
 const upload = multer({ storage: storage });
+const fs =require('fs');
 
 const getSoruByDers = async (req,res) =>{
     try {
@@ -17,18 +18,32 @@ const getSoruByDers = async (req,res) =>{
     console.log("Error in getSoruByDers controller:", error.message);
     res.status(500).json({ error: "Internal server error" });
 }}
-const getSoruById = async (req,res) =>{
+
+const getSoruById = async (req, res) => {
   try {
-  const soruid = req.params.soruid;
-  const soru = await Soru.findById(soruid)
-  if (!soru) {
-      return res.status(400).json({ error: "soru bulunamadi" });
+    const soruId = req.params.soruId; 
+    console.log("Request to get Soru by ID:", soruId); // Loglama ekledik// URL parametresinden soruId'yi al
+
+    // Veritabanından soruyu bul
+    const soru = await Soru.findById(soruId);
+
+    // Eğer soru bulunamazsa hata döndür
+    if (!soru) {
+      return res.status(404).json({ error: "Soru bulunamadı" });
+    }
+
+    // Soruyu bulduysak, istemciye JSON formatında gönder
+    res.status(200).json(soru);
+  } catch (error) {
+    console.error("Error in getSoruById controller:", error.message);
+    res.status(500).json({ error: "Internal server error" });
   }
-  res.status(200).json(soru);
-} catch (error) {
-  console.log("Error in getSoruByDers controller:", error.message);
-  res.status(500).json({ error: "Internal server error" });
-}}
+};
+
+module.exports = {
+  getSoruById
+};
+
 const getUserSoru = async (req, res) => {
     try {
       const username = req.params.userName;
@@ -54,39 +69,40 @@ const getUserSoru = async (req, res) => {
   }
   
 
-  const soruSor=async(req,res)=>{
-    try {        
+  const soruSor = async (req, res) => {
+    try {
       const id = req.user._id;
-      const {  dersName, soru, cevaplar } = req.body;
-
+      const { dersName, soru, cevaplar, sinif } = req.body;
+  
       let soruPicUrl = '';
       if (req.file) {
-          const result = await cloudinary.uploader.upload(req.file.path, {
-              folder: 'profile_pics'
-          });
-          soruPicUrl = result.secure_url;
-      } 
-      
-
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: 'profile_pics'
+        });
+        soruPicUrl = result.secure_url;
+        // Remove the file from the server after uploading to cloudinary
+        fs.unlinkSync(req.file.path);
+      }
+  
       const newSoru = new Soru({
-          userId:id,
-          dersName,
-          soru,
-          cevaplar,
-          soruPic: soruPicUrl,
+        userId: id,
+        dersName,
+        soru,
+        cevaplar,
+        soruPic: soruPicUrl,
+        sinif,
       });
-
+  
       const savedSoru = await newSoru.save();
       res.status(201).json(savedSoru);
-
     } catch (error) {
-      res.status(500).json({ message:"bağlanamadı" });
-      console.log(error.message)
+      if (!res.headersSent) {
+        res.status(500).json({ message: "bağlanamadı" });
+      }
+      console.log(error.message);
     }
-
-
-
   }
+  
 
 
   const getSorular = async (req, res) => {
@@ -149,8 +165,10 @@ const searchSorular = async (req, res) => {
       // Hem title hem de content alanlarında arama yapıyoruz.
       const results = await Soru.find({
           $or: [
-              { title: new RegExp(query, 'i') },
-              { content: new RegExp(query, 'i') }
+              { soru: new RegExp(query, 'i') },
+              { dersName: new RegExp(query, 'i') },
+              { dersName: new RegExp(query, 'i') }
+
           ]
       });
       res.json(results);
@@ -159,7 +177,33 @@ const searchSorular = async (req, res) => {
       console.log(error.message)
   }
 };
+
+
+
+const addRating = async (req, res) => {
+  try {
+      const { questionId } = req.params;
+      const { points } = req.body;
+
+      if (!points || points < 1 || points > 5) {
+          return res.status(400).json({ error: 'Invalid points. Points should be between 1 and 5.' });
+      }
+
+      const question = await Soru.findById(questionId);
+      if (!question) {
+          return res.status(404).json({ error: 'Question not found.' });
+      }
+
+      await question.addVote(points);
+      const averageRating = question.getAverageRating();
+
+      res.json({ averageRating, voteCount: question.voteCount });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
   
 
 
-module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru,searchSorular,getSoruById};
+module.exports = { getSoruByDers,getUserSoru, soruSor, getSorular, updateSoru,searchSorular,getSoruById ,addRating};

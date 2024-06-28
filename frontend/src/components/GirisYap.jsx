@@ -15,22 +15,40 @@ import {
 } from '@chakra-ui/react';
 
 function App() {
-  const[username, setUserName]= useState(' ');
+  const [username, setUserName] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleClick = async () => {
     try {
       const response = await axios.post('http://localhost:3000/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userName: username, password }),
+        userName: username,
+        password: password,
       });
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Login successful:', data);
+      if (response.status === 200) {
+        console.log('Login successful:', response.data);
+        // Giriş başarılıysa istenen işlemleri gerçekleştirin (örneğin, kullanıcıyı yönlendirin)
+      } else {
+        console.error('Login failed:', response.statusText);
+        // Giriş başarısızsa hata mesajını kullanıcıya gösterin
+      }
+    } catch (error) {
+      console.error('Error:', error.message);
+      // Hata oluşursa hata mesajını kullanıcıya gösterin
+    }
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log('Giriş yap butonuna tıklandı!');
+    try {
+      const response = await axios.post('http://localhost:3000/login', {
+        userName: username,
+        password: password,
+      }, 
+      
+      );
+      if (response.status === 200) {
+        console.log('Login successful:', response.data);
         // Giriş başarılıysa istenen işlemleri gerçekleştirin (örneğin, kullanıcıyı yönlendirin)
       } else {
         console.error('Login failed:', response.statusText);
@@ -43,7 +61,6 @@ function App() {
   };
 
   return (
-  
     <Flex minH={'100vh'} align={'center'} justify={'center'}>
       <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
         <Stack align={'center'}>
@@ -60,11 +77,19 @@ function App() {
           <Stack spacing={4}>
             <FormControl id="userName">
               <FormLabel>Kullanıcı adı</FormLabel>
-              <Input type="userName" />
+              <Input
+                type="text"
+                value={username}
+                onChange={(e) => setUserName(e.target.value)}
+              />
             </FormControl>
             <FormControl id="password">
               <FormLabel>Şifre</FormLabel>
-              <Input type="password" />
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </FormControl>
             <Stack spacing={6}>
               <Stack
@@ -74,17 +99,14 @@ function App() {
                 <Checkbox>Beni hatırla</Checkbox>
                 <Text color={'blue.500'}>Şifremi Unuttum?</Text>
               </Stack>
-              <Button colorScheme={'blue'} variant={'solid'}>
+              <Button colorScheme={'blue'} variant={'solid'} onClick={handleSubmit}>
                 Giriş Yap
               </Button>
             </Stack>
           </Stack>
         </Box>
-      
-        {/* Google ile giriş yap butonu */}
-        <Button colorScheme="red" variant="solid" onClick={() => alert('Google ile giriş yap butonuna tıklandı.')}>
-          Google ile Giriş Yap
-        </Button>
+
+        
       </Stack>
     </Flex>
   );

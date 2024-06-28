@@ -14,6 +14,8 @@ router.post('/sor',protectRoute, upload.single('soruPic') ,soruSor)
 router.get('/sorular',getSorular)
 router.put('/guncelle/:soruId',updateSoru)
 router.get('/search', searchSorular);
+router.put('/rate/:questionId',addRating)
+
 
 
 
